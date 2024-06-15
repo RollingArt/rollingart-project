@@ -1,0 +1,12 @@
+node\*modules/
+dist/
+build/
+coverage/
+.expo/
+.expo-shared/
+web-build/
+.DS_Store
+\*.log
+.env
+.idea/
+.vscode/

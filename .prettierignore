@@ -1,0 +1,9 @@
+node_modules/
+dist/
+build/
+coverage/
+.expo/
+web-build/
+.DS_Store
+.eslintrc.js
+babel.config.js
