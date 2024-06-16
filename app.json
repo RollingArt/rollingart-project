@@ -3,7 +3,7 @@
     "name": "rollingart",
     "slug": "rollingart",
     "version": "1.0.0",
-    "scheme": "your-app-scheme",
+    "scheme": "rollingart",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
