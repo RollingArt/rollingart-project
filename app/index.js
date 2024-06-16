@@ -1,3 +1,3 @@
-import MainScreen from "./MainScreen/MainScreen";
+import Game3DView from "./Game3DView/Game3DView";
 
-export default MainScreen;
+export default Game3DView;
