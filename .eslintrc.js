@@ -29,6 +29,7 @@ module.exports = {
   rules: {
     "prettier/prettier": ["error"],
     "no-multiple-empty-lines": ["error", { max: 1, maxEOF: 1, maxBOF: 0 }],
+    "react/no-unknown-property": ["error", { ignore: ["position", "args", "map", "rotation", "intensity", "castShadow"] }],
     "no-unused-vars": "error",
     quotes: ["error", "double"],
     semi: ["error", "always"],
@@ -44,6 +45,8 @@ module.exports = {
     "react-native/no-color-literals": "off",
     "react-native/sort-styles": "off",
     "func-names": "off",
+    "global-require": "off",
+    "react-native/no-inline-styles": "off",
   },
   settings: {
     react: {
