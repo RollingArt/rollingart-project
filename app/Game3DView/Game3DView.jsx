@@ -3,11 +3,11 @@ import { View, StyleSheet } from "react-native";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
-import pattern from "../../assets/pattern.png";
+import ballPattern from "../../assets/ballPattern.png";
 
 function Ball() {
   const mesh = useRef();
-  const texture = new THREE.TextureLoader().load(pattern);
+  const texture = new THREE.TextureLoader().load(ballPattern);
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
   texture.repeat.set(3, 1);
