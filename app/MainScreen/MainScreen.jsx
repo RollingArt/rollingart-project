@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { router } from "expo-router";
 import { View, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { vw, vh } from "react-native-expo-viewport-units";
 
@@ -27,14 +28,18 @@ function BallCustomization() {
 }
 
 export default function MainScreen() {
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isExitGameModalVisible, setIsExitGameModalVisible] = useState(false);
 
   function handleOpenModal() {
-    setIsModalVisible(true);
+    setIsExitGameModalVisible(true);
   }
 
   function handleCloseModal() {
-    setIsModalVisible(false);
+    setIsExitGameModalVisible(false);
+  }
+
+  function handleStartButtonTouch() {
+    router.replace("/StageSelectScreen/StageSelectScreen");
   }
 
   return (
@@ -47,6 +52,7 @@ export default function MainScreen() {
             containerStyle={[styles.button, styles.brightGreen]}
             textStyle={styles.text}
             buttonText="게임 시작"
+            onPress={handleStartButtonTouch}
           />
           <CustomButton
             containerStyle={[styles.button, styles.black]}
@@ -57,8 +63,9 @@ export default function MainScreen() {
         </View>
       </View>
       <ConfirmationModal
-        visible={isModalVisible}
-        onRequestModalClose={handleCloseModal}
+        visible={isExitGameModalVisible}
+        onleftButtonTouch={null}
+        onRightButtonTouch={handleCloseModal}
         modalMessage="게임을 종료하시겠습니까?"
       />
     </>

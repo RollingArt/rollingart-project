@@ -3,15 +3,28 @@ import { vw, vh } from "react-native-expo-viewport-units";
 import CustomButton from "../CustomButton/CustomButton";
 import sharedStyles from "../../styles/sharedStyles";
 
-export default function ConfirmationModal({ visible, onRequestModalClose, modalMessage }) {
+export default function ConfirmationModal({
+  visible,
+  modalMessage,
+  onleftButtonTouch,
+  onRightButtonTouch,
+}) {
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onRequestModalClose}>
+    <Modal visible={visible} transparent animationType="fade">
       <View style={styles.modalBackGround}>
         <View style={styles.modalView}>
           <Text style={styles.messageText}>{modalMessage}</Text>
           <View style={sharedStyles.rowWrapper}>
-            <CustomButton containerStyle={styles.buttonContainer} buttonText="YES" />
-            <CustomButton containerStyle={styles.buttonContainer} buttonText="NO" />
+            <CustomButton
+              containerStyle={styles.buttonContainer}
+              buttonText="YES"
+              onPress={onleftButtonTouch}
+            />
+            <CustomButton
+              containerStyle={styles.buttonContainer}
+              buttonText="NO"
+              onPress={onRightButtonTouch}
+            />
           </View>
         </View>
       </View>
