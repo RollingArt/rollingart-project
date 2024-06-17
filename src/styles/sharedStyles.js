@@ -6,6 +6,16 @@ const sharedStyles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  title: {
+    fontSize: 38,
+    fontWeight: "bold",
+  },
+  container: {
+    flex: 1,
+  },
+  centerHorizontal: {
+    alignItems: "center",
+  },
 });
 
 export default sharedStyles;
