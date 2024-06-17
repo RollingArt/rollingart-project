@@ -45,16 +45,21 @@ function Ground() {
   );
 }
 
-export default function Game3DView() {
+export default function Game3DView({ isOverlayVisible }) {
   return (
     <View style={styles.container}>
-      <Canvas camera={{ position: [0, 20, 10], fov: 80 }}>
+      <Canvas style={styles.canvas} camera={{ position: [0, 20, 10], fov: 80 }}>
         <ambientLight />
         <directionalLight position={[10, 10, 10]} intensity={1} castShadow />
         <Ball />
         <TransparentObject />
         <Ground />
       </Canvas>
+      {isOverlayVisible && (
+        <View style={styles.overlayContainer}>
+          <View />
+        </View>
+      )}
     </View>
   );
 }
@@ -63,5 +68,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#DAF7D9",
+  },
+  canvas: {
+    flex: 1,
+  },
+  overlayContainer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
 });
