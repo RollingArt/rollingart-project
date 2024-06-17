@@ -27,7 +27,7 @@ module.exports = {
     sourceType: "module",
   },
   rules: {
-    "prettier/prettier": ["error"],
+    "prettier/prettier": ["error", { endOfLine: "auto" }],
     "no-multiple-empty-lines": ["error", { max: 1, maxEOF: 1, maxBOF: 0 }],
     "react/no-unknown-property": ["error", { ignore: ["position", "args", "map", "rotation", "intensity", "castShadow"] }],
     "no-unused-vars": "error",
