@@ -1,4 +1,5 @@
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { router } from "expo-router";
 import { vw, vh } from "react-native-expo-viewport-units";
 
 import CustomButton from "../../src/components/CustomButton/CustomButton";
@@ -15,10 +16,11 @@ function StageCardButton({
   sterOneImage,
   starTwoImage,
   starThreeImage,
+  onStageCardPress,
 }) {
   return (
-    <TouchableOpacity style={cardButtonStyle} disabled={cardDisabled}>
-      <Text style={[!cardDisabled ? styles.enableCardText : styles.disableCardText]}>
+    <TouchableOpacity style={cardButtonStyle} disabled={cardDisabled} onPress={onStageCardPress}>
+      <Text style={!cardDisabled ? styles.enableCardText : styles.disableCardText}>
         {stageLevel}
       </Text>
       {!cardDisabled && (
@@ -33,6 +35,14 @@ function StageCardButton({
 }
 
 export default function StageSelectScreen() {
+  function handleStageCardButtonTouch() {
+    router.replace("/GameScreen/GameScreen");
+  }
+
+  function handleMainButtonTouch() {
+    router.replace("/MainScreen/MainScreen");
+  }
+
   return (
     <View style={[sharedStyles.container, sharedStyles.centerHorizontal, styles.containerPadding]}>
       <Text style={sharedStyles.title}>STAGE</Text>
@@ -44,6 +54,7 @@ export default function StageSelectScreen() {
           sterOneImage={filledStar}
           starTwoImage={filledStar}
           starThreeImage={filledStar}
+          onStageCardPress={handleStageCardButtonTouch}
         />
         <StageCardButton
           cardDisabled={false}
@@ -52,18 +63,20 @@ export default function StageSelectScreen() {
           sterOneImage={emptyStar}
           starTwoImage={emptyStar}
           starThreeImage={emptyStar}
+          onStageCardPress={handleStageCardButtonTouch}
         />
         <StageCardButton
-          cardDisabled={true}
+          cardDisabled
           cardButtonStyle={styles.disableCardButton}
           stageLevel="Stage 3"
+          onStageCardPress={handleStageCardButtonTouch}
         />
       </View>
       <CustomButton
         buttonText="메인"
         containerStyle={styles.buttonContainer}
         textStyle={styles.buttonText}
-        onPress={null}
+        onPress={handleMainButtonTouch}
       />
     </View>
   );
