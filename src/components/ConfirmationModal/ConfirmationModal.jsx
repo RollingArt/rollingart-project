@@ -6,7 +6,7 @@ import sharedStyles from "../../styles/sharedStyles";
 export default function ConfirmationModal({
   visible,
   modalMessage,
-  onleftButtonTouch,
+  onLeftButtonTouch,
   onRightButtonTouch,
 }) {
   return (
@@ -18,7 +18,7 @@ export default function ConfirmationModal({
             <CustomButton
               containerStyle={styles.buttonContainer}
               buttonText="YES"
-              onPress={onleftButtonTouch}
+              onPress={onLeftButtonTouch}
             />
             <CustomButton
               containerStyle={styles.buttonContainer}
@@ -45,7 +45,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 50,
+    borderWidth: 3,
     borderRadius: 8,
+    borderStyle: "solid",
+    borderColor: "#49a246",
     backgroundColor: "#ffffff",
   },
   messageText: {

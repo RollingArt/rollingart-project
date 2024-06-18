@@ -64,7 +64,7 @@ export default function MainScreen() {
       </View>
       <ConfirmationModal
         visible={isExitGameModalVisible}
-        onleftButtonTouch={null}
+        onLeftButtonTouch={null}
         onRightButtonTouch={handleCloseModal}
         modalMessage="게임을 종료하시겠습니까?"
       />
