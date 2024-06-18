@@ -2,8 +2,8 @@ import { useState } from "react";
 import { View, TouchableOpacity, Image, Text, StyleSheet } from "react-native";
 import { router } from "expo-router";
 import { vh, vw } from "react-native-expo-viewport-units";
-import Game3DView from "../Game3DView/Game3DView";
 
+import Game3DView from "../Game3DView/Game3DView";
 import ConfirmationModal from "../../src/components/ConfirmationModal/ConfirmationModal";
 
 import MainButtonImage from "../../assets/images/home.png";

@@ -55,11 +55,7 @@ export default function Game3DView({ isOverlayVisible }) {
         <TransparentObject />
         <Ground />
       </Canvas>
-      {isOverlayVisible && (
-        <View style={styles.overlayContainer}>
-          <View />
-        </View>
-      )}
+      {isOverlayVisible && <View style={styles.overlayContainer} />}
     </View>
   );
 }

@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import { Modal, View, Text, Image, StyleSheet } from "react-native";
 import { vw, vh } from "react-native-expo-viewport-units";
+
 import CustomButton from "../CustomButton/CustomButton";
 
 import emptyStar from "../../../assets/images/emptyStar.png";
@@ -36,7 +37,7 @@ export default function GameResultModal() {
             <Image style={styles.challengeImage} source={successImage} />
           </Text>
           <View>
-            <CustomButton containerStyle={styles.buttonContainer} buttonText="다음스테이지" />
+            <CustomButton containerStyle={styles.buttonContainer} buttonText="다음 스테이지" />
             <CustomButton containerStyle={styles.buttonContainer} buttonText="다시하기" />
             <CustomButton
               containerStyle={styles.buttonContainer}
