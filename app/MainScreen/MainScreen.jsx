@@ -8,7 +8,7 @@ import ConfirmationModal from "../../src/components/ConfirmationModal/Confirmati
 
 import rogoImage from "../../assets/images/rogoTitle.png";
 import arrowButtonImage from "../../assets/images/arrowButton.png";
-import squareImage from "../../assets/images/square.png";
+import circleImage from "../../assets/images/circle.png";
 
 function BallCustomization() {
   return (
@@ -16,7 +16,7 @@ function BallCustomization() {
       <TouchableOpacity>
         <Image style={styles.arrowImage} source={arrowButtonImage} />
       </TouchableOpacity>
-      <Image style={styles.squareImage} source={squareImage} />
+      <Image style={styles.circleImage} source={circleImage} />
       <TouchableOpacity>
         <Image
           style={[styles.arrowImage, { transform: [{ scaleX: -1 }] }]}
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     width: vw(10),
     resizeMode: "contain",
   },
-  squareImage: {
+  circleImage: {
     width: vw(50),
     margin: vw(6),
     resizeMode: "contain",

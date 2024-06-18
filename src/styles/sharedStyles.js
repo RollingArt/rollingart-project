@@ -9,6 +9,7 @@ const sharedStyles = StyleSheet.create({
   title: {
     fontSize: 38,
     fontWeight: "bold",
+    color: "#0F0F0F",
   },
   container: {
     flex: 1,
