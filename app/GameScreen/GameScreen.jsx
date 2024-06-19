@@ -3,7 +3,7 @@ import { View, TouchableOpacity, Image, Text, StyleSheet } from "react-native";
 import { router } from "expo-router";
 import { vh, vw } from "react-native-expo-viewport-units";
 
-import Game3DView from "../Game3DView/Game3DView";
+import Game3DScene from "../Game3DScene/Game3DScene";
 import ConfirmationModal from "../../src/components/ConfirmationModal/ConfirmationModal";
 
 import MainButtonImage from "../../assets/images/home.png";
@@ -55,7 +55,7 @@ export default function GameScreen() {
   return (
     <>
       <View style={styles.container}>
-        <Game3DView isOverlayVisible={isOverlayVisible} />
+        <Game3DScene isOverlayVisible={isOverlayVisible} />
         <View style={styles.uiContainer}>
           <TouchableOpacity onPress={handleMainButtonTouch}>
             <Image style={styles.Images} source={MainButtonImage} />
