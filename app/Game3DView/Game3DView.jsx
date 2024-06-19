@@ -1,31 +1,13 @@
-import { useRef } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { View, StyleSheet } from "react-native";
-import { Canvas, useFrame } from "@react-three/fiber";
-import * as THREE from "three";
+import { Canvas } from "@react-three/fiber";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import ballPattern from "../../assets/ballPattern.png";
+import Ball from "../../src/components/Ball/Ball";
 
-function Ball() {
-  const mesh = useRef();
-  const texture = new THREE.TextureLoader().load(ballPattern);
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(3, 1);
-
-  useFrame(() => {
-    if (mesh.current) {
-      mesh.current.rotation.x -= 0.03;
-      mesh.current.rotation.y += 0.0;
-    }
-  });
-
-  return (
-    <mesh ref={mesh} position={[0, 1, 0]}>
-      <sphereGeometry args={[2, 42, 42]} />
-      <meshStandardMaterial map={texture} />
-    </mesh>
-  );
-}
+import patternTexture from "../../assets/images/patternTexture.png";
+import patternTextureSecond from "../../assets/images/patternTextureSecond.png";
+import patternTextureThird from "../../assets/images/patternTextureThird.png";
 
 function TransparentObject() {
   return (
@@ -46,12 +28,26 @@ function Ground() {
 }
 
 export default function Game3DView({ isOverlayVisible }) {
+  const [patternIndex, setPatternIndex] = useState(0);
+  const patterns = useMemo(() => [patternTexture, patternTextureSecond, patternTextureThird]);
+  const selectedPattern = patterns[patternIndex];
+
+  useEffect(() => {
+    const loadPattern = async () => {
+      const savedPatternIndex = await AsyncStorage.getItem("selectedPatternIndex");
+      if (savedPatternIndex !== null) {
+        setPatternIndex(parseInt(savedPatternIndex, 10));
+      }
+    };
+    loadPattern();
+  }, []);
+
   return (
     <View style={styles.container}>
       <Canvas style={styles.canvas} camera={{ position: [0, 20, 10], fov: 80 }}>
         <ambientLight />
         <directionalLight position={[10, 10, 10]} intensity={1} castShadow />
-        <Ball />
+        <Ball currentBallPatternTexture={selectedPattern} />
         <TransparentObject />
         <Ground />
       </Canvas>

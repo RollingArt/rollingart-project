@@ -1,9 +1,9 @@
+import { useEffect, useState } from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { router } from "expo-router";
 import { vw, vh } from "react-native-expo-viewport-units";
 
 import CustomButton from "../../src/components/CustomButton/CustomButton";
-
 import sharedStyles from "../../src/styles/sharedStyles";
 
 import emptyStar from "../../assets/images/emptyStar.png";
@@ -35,9 +35,21 @@ function StageCardButton({
 }
 
 export default function StageSelectScreen() {
+  const [isLoading, setIsLoading] = useState(false);
+
   function handleStageCardButtonTouch() {
-    router.replace("/GameScreen/GameScreen");
+    setIsLoading(true);
   }
+
+  useEffect(() => {
+    if (isLoading) {
+      router.replace("/LoadingScreen/LoadingScreen");
+      setTimeout(() => {
+        setIsLoading(false);
+        router.replace("/GameScreen/GameScreen");
+      }, 2000);
+    }
+  }, [isLoading]);
 
   function handleMainButtonTouch() {
     router.replace("/MainScreen/MainScreen");
@@ -86,6 +98,17 @@ const styles = StyleSheet.create({
   containerPadding: {
     padding: 50,
   },
+  buttonContainer: {
+    width: vw(30),
+    height: vh(6),
+    backgroundColor: "#38D530",
+    borderRadius: 5,
+  },
+  cardWrapper: {
+    justifyContent: "space-between",
+    height: vh(64),
+    marginVertical: 36,
+  },
   enableCardButton: {
     width: vw(50),
     height: vh(18),
@@ -103,17 +126,6 @@ const styles = StyleSheet.create({
     margin: 12,
     borderRadius: 10,
     backgroundColor: "#D6D6D6",
-  },
-  cardWrapper: {
-    justifyContent: "space-between",
-    height: vh(64),
-    marginVertical: 36,
-  },
-  buttonContainer: {
-    width: vw(30),
-    height: vh(6),
-    backgroundColor: "#38D530",
-    borderRadius: 5,
   },
   buttonText: {
     fontSize: 16,
