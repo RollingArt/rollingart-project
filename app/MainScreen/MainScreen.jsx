@@ -1,34 +1,17 @@
 import { useState } from "react";
-import { router } from "expo-router";
-import { View, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Image, StyleSheet } from "react-native";
+import { useRouter } from "expo-router";
 import { vw, vh } from "react-native-expo-viewport-units";
 
 import CustomButton from "../../src/components/CustomButton/CustomButton";
 import ConfirmationModal from "../../src/components/ConfirmationModal/ConfirmationModal";
+import BallCustomization from "../../src/components/BallCustomization/BallCustomization";
 
 import rogoImage from "../../assets/images/rogoTitle.png";
-import arrowButtonImage from "../../assets/images/arrowButton.png";
-import circleImage from "../../assets/images/circle.png";
-
-function BallCustomization() {
-  return (
-    <View style={styles.rowWrapper}>
-      <TouchableOpacity>
-        <Image style={styles.arrowImage} source={arrowButtonImage} />
-      </TouchableOpacity>
-      <Image style={styles.circleImage} source={circleImage} />
-      <TouchableOpacity>
-        <Image
-          style={[styles.arrowImage, { transform: [{ scaleX: -1 }] }]}
-          source={arrowButtonImage}
-        />
-      </TouchableOpacity>
-    </View>
-  );
-}
 
 export default function MainScreen() {
   const [isExitGameModalVisible, setIsExitGameModalVisible] = useState(false);
+  const router = useRouter();
 
   function handleOpenModal() {
     setIsExitGameModalVisible(true);
@@ -38,7 +21,7 @@ export default function MainScreen() {
     setIsExitGameModalVisible(false);
   }
 
-  function handleStartButtonTouch() {
+  async function handleStartButtonTouch() {
     router.replace("/StageSelectScreen/StageSelectScreen");
   }
 
@@ -80,29 +63,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  rowWrapper: {
-    width: "80%",
-    height: "46%",
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  text: {
-    fontSize: 16,
-    color: "#ffffff",
-  },
   logoImage: {
     width: vw(70),
     marginTop: vh(8),
-    resizeMode: "contain",
-  },
-  arrowImage: {
-    width: vw(10),
-    resizeMode: "contain",
-  },
-  circleImage: {
-    width: vw(50),
-    margin: vw(6),
     resizeMode: "contain",
   },
   button: {
@@ -116,5 +79,9 @@ const styles = StyleSheet.create({
   },
   black: {
     backgroundColor: "#0f0f0f",
+  },
+  text: {
+    fontSize: 16,
+    color: "#ffffff",
   },
 });
