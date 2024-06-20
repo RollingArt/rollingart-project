@@ -61,7 +61,7 @@ export default function GameScreen() {
             <Image style={styles.Images} source={MainButtonImage} />
           </TouchableOpacity>
           <View style={styles.textContainer}>
-            <Text style={styles.stageText}>stage1</Text>
+            <Text style={styles.stageText}>stage 1</Text>
             <Text style={styles.timeText}>00</Text>
           </View>
           {isPauseButtonVisible ? (

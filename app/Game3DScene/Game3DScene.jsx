@@ -4,7 +4,7 @@ import { Canvas } from "@react-three/fiber";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import Ball from "../../src/components/Ball/Ball";
-import ModelLoader from "../../src/components/ModelLoader/ModelLoader";
+import ModelLoader from "../../src/hooks/ModelLoader";
 
 import getAssetUri from "../../src/utils/getAssetUri";
 

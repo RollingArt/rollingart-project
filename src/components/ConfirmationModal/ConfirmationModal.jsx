@@ -1,5 +1,5 @@
 import { Modal, View, Text, StyleSheet } from "react-native";
-import { vw, vh } from "react-native-expo-viewport-units";
+import { vw } from "react-native-expo-viewport-units";
 import CustomButton from "../CustomButton/CustomButton";
 import sharedStyles from "../../styles/sharedStyles";
 
@@ -40,8 +40,8 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalView: {
-    width: vw(80),
-    height: vh(25),
+    width: "80%",
+    height: "25%",
     justifyContent: "center",
     alignItems: "center",
     padding: 50,
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
   messageText: {
-    fontSize: 18,
+    fontSize: vw(4),
   },
   buttonContainer: {
     backgroundColor: "#DAF7D9",
