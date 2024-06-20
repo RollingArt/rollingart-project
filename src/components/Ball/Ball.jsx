@@ -9,6 +9,7 @@ export default function Ball({ currentBallPatternTexture }) {
     ballPatternTexture.wrapS = THREE.RepeatWrapping;
     ballPatternTexture.wrapT = THREE.RepeatWrapping;
     ballPatternTexture.repeat.set(3, 1);
+
     return ballPatternTexture;
   }, [currentBallPatternTexture]);
 
