@@ -20,7 +20,7 @@ function StageOneLand() {
 
   useEffect(() => {
     async function loadModel() {
-      const uri = await getAssetUri(require("../../assets/models/stageOneLand.gltf"));
+      const uri = await getAssetUri(require("../../assets/models/stageOne.glb"));
       setModelUri(uri);
     }
     loadModel();

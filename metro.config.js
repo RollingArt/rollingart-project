@@ -16,6 +16,7 @@ module.exports = (async () => {
         "png",
         "bmp",
         "tga",
+        "bin",
       ],
     },
   };
