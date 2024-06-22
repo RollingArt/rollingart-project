@@ -1,14 +1,14 @@
 import { useEffect } from "react";
-import { useGLTF } from "@react-three/drei";
+import { useGLTF } from "@react-three/drei/native";
 
 export default function ModelLoader({ modelUri, onLoad }) {
-  const gltf = useGLTF(modelUri);
+  const model = useGLTF(modelUri);
 
   useEffect(() => {
-    if (gltf) {
-      onLoad(gltf.scene);
+    if (model) {
+      onLoad(model.scene);
     }
-  }, [gltf, onLoad]);
+  }, [model, onLoad]);
 
   return null;
 }
