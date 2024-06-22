@@ -35,11 +35,13 @@ export default function BallCustomization() {
       </TouchableOpacity>
       <View style={styles.circleContainer}>
         <Image style={styles.circleImage} source={circleImage} />
-        <Canvas style={styles.canvasContainer}>
-          <ambientLight />
-          <directionalLight position={[10, 10, 10]} intensity={1} castShadow />
-          <Ball currentBallPatternTexture={patterns[patternIndex]} />
-        </Canvas>
+        <View style={styles.ballContainer}>
+          <Canvas style={styles.canvasContainer}>
+            <ambientLight />
+            <directionalLight position={[10, 10, 10]} intensity={1} castShadow />
+            <Ball currentBallPatternTexture={patterns[patternIndex]} />
+          </Canvas>
+        </View>
       </View>
       <TouchableOpacity onPress={handleNextPattern}>
         <Image
@@ -63,6 +65,14 @@ const styles = StyleSheet.create({
     position: "relative",
     width: vw(50),
     height: vh(25),
+  },
+  ballContainer: {
+    width: vw(50),
+    height: vh(25),
+    top: vh(-4),
+    position: "absolute",
+    resizeMode: "contain",
+    zIndex: 2,
   },
   rowWrapper: {
     width: "80%",
