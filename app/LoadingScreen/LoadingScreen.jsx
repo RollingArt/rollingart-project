@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { View, Image, Text, StyleSheet } from "react-native";
 import { vw, vh } from "react-native-expo-viewport-units";
 import { Canvas } from "@react-three/fiber";

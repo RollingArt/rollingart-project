@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { View, StyleSheet, Platform } from "react-native";
 import { Canvas } from "@react-three/fiber";
 import { Accelerometer } from "expo-sensors";
@@ -38,14 +38,16 @@ function StageOneLand() {
 
 export default function Game3DScreen() {
   const ballMeshRef = useRef();
-  const [patternIndex, setPatternIndex] = useState(0);
-  const patterns = useMemo(() => [patternTexture, patternTextureSecond, patternTextureThird]);
-  const selectedPattern = patterns[patternIndex];
+
   const [accelData, setAccelData] = useState({ x: 0, y: 0, z: 0 });
   const initialTilt = useRef({ x: 0, y: 0, z: 0 });
   const position = useRef({ x: 0, y: 1, z: 0 });
   const velocity = useRef({ x: 0, y: 0, z: 0 });
   const friction = 1.2;
+
+  const [patternIndex, setPatternIndex] = useState(0);
+  const patterns = useMemo(() => [patternTexture, patternTextureSecond, patternTextureThird]);
+  const selectedPattern = patterns[patternIndex];
 
   function normalizeSensorData(data) {
     if (Platform.OS === "android") {

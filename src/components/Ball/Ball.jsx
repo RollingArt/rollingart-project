@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import TransparentObject from "../TransparentObject/TransparentObject";
@@ -13,6 +13,10 @@ export default function Ball({
   ballMeshRef,
   showTransparentObject = false,
 }) {
+  const accumulatedQuaternion = useRef(new THREE.Quaternion());
+  const position = useRef({ ...initialPosition });
+  const velocity = useRef({ ...initialVelocity });
+
   const texture = useMemo(() => {
     const ballPatternTexture = new THREE.TextureLoader().load(currentBallPatternTexture);
     ballPatternTexture.wrapS = THREE.RepeatWrapping;
@@ -20,9 +24,6 @@ export default function Ball({
     ballPatternTexture.repeat.set(3, 1);
     return ballPatternTexture;
   }, [currentBallPatternTexture]);
-  const accumulatedQuaternion = useRef(new THREE.Quaternion());
-  const position = useRef({ ...initialPosition });
-  const velocity = useRef({ ...initialVelocity });
 
   useFrame((_, delta) => {
     if (ballMeshRef?.current && position.current) {
