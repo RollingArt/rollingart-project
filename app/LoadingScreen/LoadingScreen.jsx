@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { View, Image, Text, StyleSheet } from "react-native";
 import { vw, vh } from "react-native-expo-viewport-units";
 import { Canvas } from "@react-three/fiber";
@@ -31,11 +31,13 @@ export default function LoadingScreen() {
       <Text style={styles.loadingText}>Loading...</Text>
       <Image style={styles.circleImage} source={circleImage} />
       <View style={styles.circleImage}>
-        <Canvas style={styles.canvasContainer}>
-          <ambientLight />
-          <directionalLight position={[10, 10, 10]} intensity={1} castShadow />
-          <Ball currentBallPatternTexture={selectedPattern} />
-        </Canvas>
+        <View style={styles.ballContainer}>
+          <Canvas style={styles.canvasContainer}>
+            <ambientLight />
+            <directionalLight position={[10, 10, 10]} intensity={1} castShadow />
+            <Ball currentBallPatternTexture={selectedPattern} />
+          </Canvas>
+        </View>
       </View>
     </View>
   );
@@ -50,6 +52,14 @@ const styles = StyleSheet.create({
     width: vw(50),
     height: vh(25),
     top: vh(-23.5),
+    position: "absolute",
+    resizeMode: "contain",
+    zIndex: 2,
+  },
+  ballContainer: {
+    width: vw(50),
+    height: vh(25),
+    top: vh(-4),
     position: "absolute",
     resizeMode: "contain",
     zIndex: 2,
