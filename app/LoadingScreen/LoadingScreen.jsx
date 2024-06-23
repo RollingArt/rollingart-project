@@ -4,7 +4,7 @@ import { vw, vh } from "react-native-expo-viewport-units";
 import { Canvas } from "@react-three/fiber";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import Ball from "../../src/components/Ball/Ball";
+import StaticBall from "../../src/components/StaticBall/StaticBall";
 
 import patternTexture from "../../assets/images/patternTexture.png";
 import patternTextureSecond from "../../assets/images/patternTextureSecond.png";
@@ -35,7 +35,7 @@ export default function LoadingScreen() {
           <Canvas style={styles.canvasContainer}>
             <ambientLight />
             <directionalLight position={[10, 10, 10]} intensity={1} castShadow />
-            <Ball currentBallPatternTexture={selectedPattern} />
+            <StaticBall currentBallPatternTexture={selectedPattern} />
           </Canvas>
         </View>
       </View>

@@ -1,9 +1,7 @@
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { useSharedValue, useAnimatedReaction, runOnJS } from "react-native-reanimated";
-
-import TransparentObject from "../TransparentObject/TransparentObject";
+import { useSharedValue, runOnJS } from "react-native-reanimated";
 
 export default function Ball({
   currentBallPatternTexture,
@@ -14,7 +12,6 @@ export default function Ball({
   initialTilt,
   ballMeshRef,
   onPathUpdate,
-  showTransparentObject = false,
 }) {
   const accumulatedQuaternion = useRef(new THREE.Quaternion());
   const position = useRef({ ...initialPosition });
@@ -112,30 +109,10 @@ export default function Ball({
     }
   });
 
-  useAnimatedReaction(
-    () => ({
-      x: positionX.value,
-      y: positionY.value,
-      z: positionZ.value,
-      rotationX: rotationX.value,
-      rotationZ: rotationZ.value,
-    }),
-    (values) => {
-      if (showTransparentObject) {
-        const mesh = ballMeshRef.current;
-        mesh.position.set(values.x, values.y, values.z);
-        mesh.rotation.x = values.rotationX;
-        mesh.rotation.z = values.rotationZ;
-      }
-    },
-    [ballMeshRef],
-  );
-
   return (
     <mesh ref={ballMeshRef}>
       <sphereGeometry args={[2, 16, 16]} />
       <meshStandardMaterial map={texture} />
-      {showTransparentObject && <TransparentObject ballMeshRef={ballMeshRef} velocity={velocity} />}
     </mesh>
   );
 }
