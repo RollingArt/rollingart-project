@@ -130,7 +130,6 @@ export default function Game3DScreen() {
         friction={friction}
         initialTilt={initialTilt}
         onPathUpdate={handlePathUpdate}
-        showTransparentObject={false}
       />
       <TransparentObject ballMeshRef={ballMeshRef} velocity={velocity} />
       <StageOneLand />
