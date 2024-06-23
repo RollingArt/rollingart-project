@@ -27,9 +27,6 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      ["expo-router"],
-      ["expo-asset", { "assets": ["path/to/file.png", "path/to/directory"] }]
-    ]
+    "plugins": [["expo-router"], ["expo-asset", { "assets": [] }]]
   }
 }

@@ -1,22 +1,27 @@
 import { useEffect, useRef, useState, useMemo } from "react";
-import { View, StyleSheet, Platform } from "react-native";
-import { Canvas } from "@react-three/fiber";
-import { Accelerometer } from "expo-sensors";
+import { StyleSheet, Platform } from "react-native";
+import { Canvas, extend } from "@react-three/fiber";
+import * as THREE from "three";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Accelerometer } from "expo-sensors";
 
 import Ball from "../../src/components/Ball/Ball";
 import CameraController from "../../src/components/CameraController/CameraController";
 import TransparentObject from "../../src/components/TransparentObject/TransparentObject";
+
 import ModelLoader from "../../src/hooks/ModelLoader";
+import ExtractPathVertices from "../../src/hooks/ExtractPathVertices";
 import getAssetUri from "../../src/utils/getAssetUri";
 
 import patternTexture from "../../assets/images/patternTexture.png";
 import patternTextureSecond from "../../assets/images/patternTextureSecond.png";
 import patternTextureThird from "../../assets/images/patternTextureThird.png";
 
+extend(THREE);
+
 function StageOneLand() {
   const [modelUri, setModelUri] = useState(null);
-  const [scene, setScene] = useState(null);
+  const [model, setModel] = useState(null);
 
   useEffect(() => {
     async function loadModel() {
@@ -30,13 +35,16 @@ function StageOneLand() {
 
   return (
     <>
-      <ModelLoader modelUri={modelUri} onLoad={setScene} />
-      {scene && <primitive object={scene} position={[0, -100, 0]} />}
+      <ModelLoader modelUri={modelUri} onLoad={setModel} />
+      {model && <primitive object={model} position={[0, -40, 0]} />}
+      {model && <ExtractPathVertices model={model} />}
     </>
   );
 }
 
 export default function Game3DScreen() {
+  // eslint-disable-next-line no-unused-vars
+  const [ballPath, setBallPath] = useState([]);
   const ballMeshRef = useRef();
 
   const [accelData, setAccelData] = useState({ x: 0, y: 0, z: 0 });
@@ -95,26 +103,42 @@ export default function Game3DScreen() {
     };
   }, []);
 
+  const handlePathUpdate = (newPosition) => {
+    setBallPath((prevPath) => {
+      const lastPosition = prevPath[prevPath.length - 1];
+      if (
+        !lastPosition ||
+        Math.sqrt(
+          (newPosition.x - lastPosition.x) ** 2 +
+            (newPosition.y - lastPosition.y) ** 2 +
+            (newPosition.z - lastPosition.z) ** 2,
+        ) > 2
+      ) {
+        return [...prevPath, newPosition];
+      }
+      return prevPath;
+    });
+  };
+
   return (
-    <View style={styles.container}>
-      <Canvas style={styles.canvas}>
-        <ambientLight />
-        <directionalLight position={[10, 10, 10]} intensity={1} castShadow />
-        <CameraController followTarget={ballMeshRef} />
-        <Ball
-          ballMeshRef={ballMeshRef}
-          currentBallPatternTexture={selectedPattern}
-          initialPosition={position.current}
-          initialVelocity={velocity.current}
-          accelData={accelData}
-          friction={friction}
-          initialTilt={initialTilt}
-          showTransparentObject={false}
-        />
-        <TransparentObject ballMeshRef={ballMeshRef} velocity={velocity} />
-        <StageOneLand />
-      </Canvas>
-    </View>
+    <Canvas style={styles.container}>
+      <ambientLight />
+      <directionalLight position={[10, 10, 10]} intensity={1} castShadow />
+      <CameraController followTarget={ballMeshRef} />
+      <Ball
+        ballMeshRef={ballMeshRef}
+        currentBallPatternTexture={selectedPattern}
+        initialPosition={position.current}
+        initialVelocity={velocity.current}
+        accelData={accelData}
+        friction={friction}
+        initialTilt={initialTilt}
+        onPathUpdate={handlePathUpdate}
+        showTransparentObject={false}
+      />
+      <TransparentObject ballMeshRef={ballMeshRef} velocity={velocity} />
+      <StageOneLand />
+    </Canvas>
   );
 }
 
@@ -122,8 +146,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#DAF7D9",
-  },
-  canvas: {
-    flex: 1,
   },
 });
