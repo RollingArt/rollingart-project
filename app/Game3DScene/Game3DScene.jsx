@@ -103,17 +103,13 @@ export default function Game3DScreen() {
     };
   }, []);
 
+  const distance = (pos1, pos2) =>
+    Math.sqrt((pos1.x - pos2.x) ** 2 + (pos1.y - pos2.y) ** 2 + (pos1.z - pos2.z) ** 2);
+
   const handlePathUpdate = (newPosition) => {
     setBallPath((prevPath) => {
       const lastPosition = prevPath[prevPath.length - 1];
-      if (
-        !lastPosition ||
-        Math.sqrt(
-          (newPosition.x - lastPosition.x) ** 2 +
-            (newPosition.y - lastPosition.y) ** 2 +
-            (newPosition.z - lastPosition.z) ** 2,
-        ) > 2
-      ) {
+      if (!lastPosition || distance(newPosition, lastPosition) > 2) {
         return [...prevPath, newPosition];
       }
       return prevPath;

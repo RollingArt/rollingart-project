@@ -7,11 +7,11 @@ import TransparentObject from "../TransparentObject/TransparentObject";
 
 export default function Ball({
   currentBallPatternTexture,
-  initialPosition = { x: 0, y: 0, z: 0 },
-  initialVelocity = { x: 0, y: 0, z: 0 },
-  accelData = { x: 0, y: 0, z: 0 },
-  friction = 1.2,
-  initialTilt = { x: 0, y: 0, z: 0 },
+  initialPosition,
+  initialVelocity,
+  accelData,
+  friction,
+  initialTilt,
   ballMeshRef,
   onPathUpdate,
   showTransparentObject = false,
@@ -25,9 +25,9 @@ export default function Ball({
   const frameCount = useRef(0);
   const updateInterval = 30;
 
-  const positionX = useSharedValue(initialPosition.x);
-  const positionY = useSharedValue(initialPosition.y);
-  const positionZ = useSharedValue(initialPosition.z);
+  const positionX = useSharedValue(initialPosition?.x);
+  const positionY = useSharedValue(initialPosition?.y);
+  const positionZ = useSharedValue(initialPosition?.z);
 
   const rotationX = useSharedValue(0);
   const rotationZ = useSharedValue(0);
@@ -96,7 +96,7 @@ export default function Ball({
       accumulatedQuaternion.current.multiplyQuaternions(quaternion, accumulatedQuaternion.current);
 
       if (ballMeshRef.current) {
-        const mesh = ballMeshRef.current; // 참조된 객체를 새로운 변수에 할당
+        const mesh = ballMeshRef.current;
         mesh.quaternion.copy(accumulatedQuaternion.current);
         mesh.position.set(position.current.x, position.current.y, position.current.z);
       }
