@@ -47,6 +47,7 @@ module.exports = {
     "func-names": "off",
     "global-require": "off",
     "react-native/no-inline-styles": "off",
+    "no-plusplus": "off",
   },
   settings: {
     react: {
