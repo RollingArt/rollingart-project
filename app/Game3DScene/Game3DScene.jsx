@@ -19,9 +19,10 @@ import patternTextureThird from "../../assets/images/patternTextureThird.png";
 
 extend(THREE);
 
-function StageOneLand() {
+function StageOneLand({ landRef }) {
   const [modelUri, setModelUri] = useState(null);
   const [model, setModel] = useState(null);
+  const localLand = useRef();
 
   useEffect(() => {
     async function loadModel() {
@@ -31,12 +32,18 @@ function StageOneLand() {
     loadModel();
   }, []);
 
+  useEffect(() => {
+    if (model && localLand) {
+      localLand.current = model;
+    }
+  }, [model, landRef]);
+
   if (!modelUri) return null;
 
   return (
     <>
       <ModelLoader modelUri={modelUri} onLoad={setModel} />
-      {model && <primitive object={model} position={[0, -40, 0]} />}
+      {model && <primitive object={model} position={[0, -30, 0]} />}
       {model && <ExtractPathVertices model={model} />}
     </>
   );
@@ -46,6 +53,7 @@ export default function Game3DScreen() {
   // eslint-disable-next-line no-unused-vars
   const [ballPath, setBallPath] = useState([]);
   const ballMeshRef = useRef();
+  const landRef = useRef();
 
   const [accelData, setAccelData] = useState({ x: 0, y: 0, z: 0 });
   const initialTilt = useRef({ x: 0, y: 0, z: 0 });
@@ -130,9 +138,10 @@ export default function Game3DScreen() {
         friction={friction}
         initialTilt={initialTilt}
         onPathUpdate={handlePathUpdate}
+        landRef={landRef}
       />
       <TransparentObject ballMeshRef={ballMeshRef} velocity={velocity} />
-      <StageOneLand />
+      <StageOneLand landRef={landRef} />
     </Canvas>
   );
 }
