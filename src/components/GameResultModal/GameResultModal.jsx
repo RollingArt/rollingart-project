@@ -9,13 +9,13 @@ import filledStar from "../../../assets/images/filledStar.png";
 import successImage from "../../../assets/images/success.png";
 import failedImage from "../../../assets/images/fail.png";
 
-export default function GameResultModal() {
+export default function GameResultModal({ visible }) {
   function handleMainButtonTouch() {
     router.replace("/MainScreen/MainScreen");
   }
 
   return (
-    <Modal transparent animationType="fade">
+    <Modal visible={visible} transparent animationType="fade">
       <View style={styles.modalBackGround}>
         <View style={styles.modalView}>
           <Text style={styles.messageText}>훌륭합니다!</Text>
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   },
   modalView: {
     width: vw(80),
-    height: vh(50),
+    height: vh(60),
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 3,

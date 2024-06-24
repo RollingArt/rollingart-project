@@ -5,6 +5,7 @@ import { vh, vw } from "react-native-expo-viewport-units";
 
 import Game3DScene from "../Game3DScene/Game3DScene";
 import ConfirmationModal from "../../src/components/ConfirmationModal/ConfirmationModal";
+import GameResultModal from "../../src/components/GameResultModal/GameResultModal";
 
 import MainButtonImage from "../../assets/images/home.png";
 import pauseButtonImage from "../../assets/images/pause.png";
@@ -16,6 +17,7 @@ export default function GameScreen() {
   const [isPauseButtonVisible, setIsPauseButtonVisible] = useState(true);
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
   const [isMainModalVisible, setIsMainModalVisible] = useState(false);
+  const [isGameResultModalVisible, setIsGameResultModalVisible] = useState(false);
   const [sensitiveCount, setSensitiveCount] = useState(5);
 
   function handleGamePauseToggle() {
@@ -52,10 +54,14 @@ export default function GameScreen() {
     }
   }
 
+  function onGameOver() {
+    setIsGameResultModalVisible(true);
+  }
+
   return (
     <>
       <View style={styles.container}>
-        <Game3DScene isOverlayVisible={isOverlayVisible} />
+        <Game3DScene isOverlayVisible={isOverlayVisible} onGameOver={onGameOver} />
         <View style={styles.uiContainer}>
           <TouchableOpacity onPress={handleMainButtonTouch}>
             <Image style={styles.Images} source={MainButtonImage} />
@@ -84,6 +90,7 @@ export default function GameScreen() {
           </TouchableOpacity>
         </View>
       </View>
+      <GameResultModal visible={isGameResultModalVisible} />
       <ConfirmationModal
         visible={isMainModalVisible}
         onLeftButtonTouch={handleLeftButtonTouch}
