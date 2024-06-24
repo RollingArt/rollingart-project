@@ -2,15 +2,15 @@ import { useState, useRef, useCallback } from "react";
 
 export default function useTimer(initialTime) {
   const [timeLeft, setTimeLeft] = useState(initialTime);
-  const [isRunning, setIsRunning] = useState(false);
+  const [isTimeRunning, setIsTimeRunning] = useState(false);
   const startTimeRef = useRef(null);
   const accumulatedTimeRef = useRef(0);
   const intervalTimeRef = useRef(null);
 
   const startTimer = useCallback(() => {
-    if (isRunning) return;
+    if (isTimeRunning) return;
 
-    setIsRunning(true);
+    setIsTimeRunning(true);
     startTimeRef.current = Date.now();
     intervalTimeRef.current = setInterval(() => {
       const now = Date.now();
@@ -20,26 +20,26 @@ export default function useTimer(initialTime) {
 
       if (newTimeLeft === 0) {
         clearInterval(intervalTimeRef.current);
-        setIsRunning(false);
+        setIsTimeRunning(false);
       }
     }, 100);
-  }, [isRunning, initialTime]);
+  }, [isTimeRunning, initialTime]);
 
   const stopTimer = useCallback(() => {
-    if (!isRunning) return;
+    if (!isTimeRunning) return;
 
     clearInterval(intervalTimeRef.current);
     accumulatedTimeRef.current += (Date.now() - startTimeRef.current) / 1000;
-    setIsRunning(false);
-  }, [isRunning]);
+    setIsTimeRunning(false);
+  }, [isTimeRunning]);
 
   const resetTimer = useCallback(() => {
     clearInterval(intervalTimeRef.current);
     accumulatedTimeRef.current = 0;
     setTimeLeft(initialTime);
-    setIsRunning(false);
+    setIsTimeRunning(false);
     startTimer();
   }, [initialTime, startTimer]);
 
-  return { timeLeft, isRunning, startTimer, stopTimer, resetTimer };
+  return { timeLeft, isTimeRunning, startTimer, stopTimer, resetTimer };
 }
