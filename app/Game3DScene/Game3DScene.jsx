@@ -58,7 +58,7 @@ function StageOneLand({ setLandRef }) {
 }
 
 export default function Game3DScreen({ onGameOver }) {
-  const [isGameStart, setGameStart] = useState(false);
+  const [isGameStart, setIsGameStart] = useState(false);
   // eslint-disable-next-line no-unused-vars
   const [ballPath, setBallPath] = useState([]);
   const ballMeshRef = useRef();
@@ -158,7 +158,7 @@ export default function Game3DScreen({ onGameOver }) {
           landRef={landRef}
           startZoneRef={startZoneRef}
           endZoneRef={endZoneRef}
-          onGameStart={() => setGameStart(true)}
+          onGameStart={() => setIsGameStart(true)}
           onGameOver={onGameOver}
         />
         <TransparentObject ballMeshRef={ballMeshRef} velocity={velocity} />
