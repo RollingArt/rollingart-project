@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState, useMemo } from "react";
-import { StyleSheet, Platform } from "react-native";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import { StyleSheet, Platform, View, Text } from "react-native";
 import { Canvas, extend } from "@react-three/fiber";
 import * as THREE from "three";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Accelerometer } from "expo-sensors";
+import { Box } from "@react-three/drei";
 
 import Ball from "../../src/components/Ball/Ball";
 import CameraController from "../../src/components/CameraController/CameraController";
@@ -19,10 +20,17 @@ import patternTextureThird from "../../assets/images/patternTextureThird.png";
 
 extend(THREE);
 
-function StageOneLand({ landRef }) {
+function EventZone({ zoneRef, position, boxColor, size }) {
+  return (
+    <Box ref={zoneRef} args={size} position={position}>
+      <meshStandardMaterial args={[{ color: boxColor, transparent: true, opacity: 0.5 }]} />
+    </Box>
+  );
+}
+
+function StageOneLand({ setLandRef }) {
   const [modelUri, setModelUri] = useState(null);
   const [model, setModel] = useState(null);
-  const localLand = useRef();
 
   useEffect(() => {
     async function loadModel() {
@@ -33,10 +41,10 @@ function StageOneLand({ landRef }) {
   }, []);
 
   useEffect(() => {
-    if (model && localLand) {
-      localLand.current = model;
+    if (model) {
+      setLandRef(model);
     }
-  }, [model, landRef]);
+  }, [model, setLandRef]);
 
   if (!modelUri) return null;
 
@@ -49,15 +57,19 @@ function StageOneLand({ landRef }) {
   );
 }
 
-export default function Game3DScreen() {
+export default function Game3DScreen({ onGameOver }) {
+  const [isGameStart, setIsGameStart] = useState(false);
   // eslint-disable-next-line no-unused-vars
   const [ballPath, setBallPath] = useState([]);
   const ballMeshRef = useRef();
+
   const landRef = useRef();
+  const startZoneRef = useRef();
+  const endZoneRef = useRef();
 
   const [accelData, setAccelData] = useState({ x: 0, y: 0, z: 0 });
   const initialTilt = useRef({ x: 0, y: 0, z: 0 });
-  const position = useRef({ x: 0, y: 1, z: 0 });
+  const position = useRef({ x: -120, y: 1, z: 0 });
   const velocity = useRef({ x: 0, y: 0, z: 0 });
   const friction = 1.2;
 
@@ -124,25 +136,52 @@ export default function Game3DScreen() {
     });
   };
 
+  const setLandRef = useCallback((model) => {
+    landRef.current = model;
+  }, []);
+
   return (
-    <Canvas style={styles.container}>
-      <ambientLight />
-      <directionalLight position={[10, 10, 10]} intensity={1} castShadow />
-      <CameraController followTarget={ballMeshRef} />
-      <Ball
-        ballMeshRef={ballMeshRef}
-        currentBallPatternTexture={selectedPattern}
-        initialPosition={position.current}
-        initialVelocity={velocity.current}
-        accelData={accelData}
-        friction={friction}
-        initialTilt={initialTilt}
-        onPathUpdate={handlePathUpdate}
-        landRef={landRef}
-      />
-      <TransparentObject ballMeshRef={ballMeshRef} velocity={velocity} />
-      <StageOneLand landRef={landRef} />
-    </Canvas>
+    <>
+      <Canvas style={styles.container}>
+        <ambientLight />
+        <directionalLight position={[10, 10, 10]} intensity={1} castShadow />
+        <CameraController followTarget={ballMeshRef} />
+        <Ball
+          ballMeshRef={ballMeshRef}
+          currentBallPatternTexture={selectedPattern}
+          initialPosition={position.current}
+          initialVelocity={velocity.current}
+          accelData={accelData}
+          friction={friction}
+          initialTilt={initialTilt}
+          onPathUpdate={handlePathUpdate}
+          landRef={landRef}
+          startZoneRef={startZoneRef}
+          endZoneRef={endZoneRef}
+          onGameStart={() => setIsGameStart(true)}
+          onGameOver={onGameOver}
+        />
+        <TransparentObject ballMeshRef={ballMeshRef} velocity={velocity} />
+        <StageOneLand setLandRef={setLandRef} />
+        <EventZone
+          zoneRef={startZoneRef}
+          position={[-60, -5, 50]}
+          boxColor="red"
+          size={[20, 20, 20]}
+        />
+        <EventZone
+          zoneRef={endZoneRef}
+          position={[-60, -5, 0]}
+          boxColor="blue"
+          size={[20, 20, 20]}
+        />
+      </Canvas>
+      {isGameStart && (
+        <View>
+          <Text>Game Started!</Text>
+        </View>
+      )}
+    </>
   );
 }
 

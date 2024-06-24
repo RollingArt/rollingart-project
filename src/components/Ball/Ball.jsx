@@ -13,6 +13,10 @@ export default function Ball({
   ballMeshRef,
   onPathUpdate,
   landRef,
+  startZoneRef,
+  endZoneRef,
+  onGameOver,
+  onGameStart,
 }) {
   const accumulatedQuaternion = useRef(new THREE.Quaternion());
   const position = useRef({ ...initialPosition });
@@ -32,6 +36,8 @@ export default function Ball({
 
   const rotationX = useSharedValue(0);
   const rotationZ = useSharedValue(0);
+
+  const deadZoneHeight = -80;
 
   const texture = useMemo(() => {
     const ballPatternTexture = new THREE.TextureLoader().load(currentBallPatternTexture);
@@ -90,6 +96,8 @@ export default function Ball({
         const { normal } = intersects[0].face;
         landSlopleX = normal.x;
         landSlopleY = normal.y;
+      } else if (position.current.y < deadZoneHeight) {
+        runOnJS(onGameOver)();
       }
 
       velocity.current.x += (adjustedX + landSlopleX) * delta * 8;
@@ -124,6 +132,17 @@ export default function Ball({
         const mesh = ballMeshRef.current;
         mesh.quaternion.copy(accumulatedQuaternion.current);
         mesh.position.set(position.current.x, position.current.y, position.current.z);
+
+        const ballPosition = mesh.position;
+        const startBox = new THREE.Box3().setFromObject(startZoneRef.current);
+        const endBox = new THREE.Box3().setFromObject(endZoneRef.current);
+
+        if (startBox.containsPoint(ballPosition)) {
+          runOnJS(onGameStart)();
+        }
+        if (endBox.containsPoint(ballPosition)) {
+          runOnJS(onGameOver)();
+        }
       }
 
       positionX.value = position.current.x;
