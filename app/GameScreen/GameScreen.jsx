@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import { vh, vw } from "react-native-expo-viewport-units";
 
 import Game3DScene from "../Game3DScene/Game3DScene";
+import useTimer from "../../src/hooks/useTimer";
 import ConfirmationModal from "../../src/components/ConfirmationModal/ConfirmationModal";
 import GameResultModal from "../../src/components/GameResultModal/GameResultModal";
 
@@ -14,32 +15,42 @@ import increaseImage from "../../assets/images/increase.png";
 import decreaseImage from "../../assets/images/decrease.png";
 
 export default function GameScreen() {
+  const [sensitiveCount, setSensitiveCount] = useState(5);
+
   const [isPauseButtonVisible, setIsPauseButtonVisible] = useState(true);
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
+
   const [isMainModalVisible, setIsMainModalVisible] = useState(false);
   const [isGameResultModalVisible, setIsGameResultModalVisible] = useState(false);
-  const [sensitiveCount, setSensitiveCount] = useState(5);
+
+  const initialTime = 60;
+  const { timeLeft, startTimer, stopTimer, resetTimer } = useTimer(initialTime);
 
   function handleGamePauseToggle() {
     if (isPauseButtonVisible) {
       setIsPauseButtonVisible(false);
       setIsOverlayVisible(true);
+      stopTimer();
     } else {
       setIsPauseButtonVisible(true);
       setIsOverlayVisible(false);
+      startTimer();
     }
   }
 
   function handleMainButtonTouch() {
     setIsMainModalVisible(true);
+    stopTimer();
   }
 
   function handleRightButtonTouch() {
     setIsMainModalVisible(false);
+    startTimer();
   }
 
   function handleLeftButtonTouch() {
     router.replace("/MainScreen/MainScreen");
+    resetTimer();
   }
 
   function handleIncreseCount() {
@@ -54,21 +65,30 @@ export default function GameScreen() {
     }
   }
 
+  function onGameStart() {
+    startTimer();
+  }
+
   function onGameOver() {
     setIsGameResultModalVisible(true);
+    stopTimer();
   }
 
   return (
     <>
       <View style={styles.container}>
-        <Game3DScene isOverlayVisible={isOverlayVisible} onGameOver={onGameOver} />
+        <Game3DScene
+          isOverlayVisible={isOverlayVisible}
+          onGameStart={onGameStart}
+          onGameOver={onGameOver}
+        />
         <View style={styles.uiContainer}>
           <TouchableOpacity onPress={handleMainButtonTouch}>
             <Image style={styles.Images} source={MainButtonImage} />
           </TouchableOpacity>
           <View style={styles.textContainer}>
             <Text style={styles.stageText}>stage 1</Text>
-            <Text style={styles.timeText}>00</Text>
+            <Text style={styles.timeText}>{timeLeft}</Text>
           </View>
           {isPauseButtonVisible ? (
             <TouchableOpacity onPress={handleGamePauseToggle}>

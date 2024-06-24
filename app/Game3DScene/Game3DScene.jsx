@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
-import { StyleSheet, Platform, View, Text } from "react-native";
+import { StyleSheet, Platform, View } from "react-native";
 import { Canvas, extend } from "@react-three/fiber";
 import * as THREE from "three";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -57,8 +57,7 @@ function StageOneLand({ setLandRef }) {
   );
 }
 
-export default function Game3DScreen({ onGameOver }) {
-  const [isGameStart, setIsGameStart] = useState(false);
+export default function Game3DScreen({ isOverlayVisible, onGameStart, onGameOver }) {
   // eslint-disable-next-line no-unused-vars
   const [ballPath, setBallPath] = useState([]);
   const ballMeshRef = useRef();
@@ -158,29 +157,27 @@ export default function Game3DScreen({ onGameOver }) {
           landRef={landRef}
           startZoneRef={startZoneRef}
           endZoneRef={endZoneRef}
-          onGameStart={() => setIsGameStart(true)}
+          onGameStart={onGameStart}
           onGameOver={onGameOver}
         />
         <TransparentObject ballMeshRef={ballMeshRef} velocity={velocity} />
         <StageOneLand setLandRef={setLandRef} />
         <EventZone
           zoneRef={startZoneRef}
+          onGameStart={onGameStart}
           position={[-60, -5, 50]}
           boxColor="red"
           size={[20, 20, 20]}
         />
         <EventZone
           zoneRef={endZoneRef}
+          onGameOver={onGameOver}
           position={[-60, -5, 0]}
           boxColor="blue"
           size={[20, 20, 20]}
         />
       </Canvas>
-      {isGameStart && (
-        <View>
-          <Text>Game Started!</Text>
-        </View>
-      )}
+      {isOverlayVisible && <View style={styles.overlayContainer} />}
     </>
   );
 }
@@ -189,5 +186,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#DAF7D9",
+  },
+  overlayContainer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
 });
