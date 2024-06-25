@@ -14,6 +14,7 @@ import ColliderBox from "../../src/components/ColliderBox/ColliderBox";
 import ModelLoader from "../../src/hooks/ModelLoader";
 import ExtractPathVertices from "../../src/hooks/ExtractPathVertices";
 import getAssetUri from "../../src/utils/getAssetUri";
+import colliderBoxes from "../../src/utils/colliderBoxes";
 
 import patternTexture from "../../assets/images/patternTexture.png";
 import patternTextureSecond from "../../assets/images/patternTextureSecond.png";
@@ -82,29 +83,6 @@ export default function Game3DScreen({ isOverlayVisible, onGameStart, onGameOver
   const [patternIndex, setPatternIndex] = useState(0);
   const patterns = useMemo(() => [patternTexture, patternTextureSecond, patternTextureThird]);
   const selectedPattern = patterns[patternIndex];
-
-  const colliderBoxes = [
-    { id: "collider1", size: [77, 20, 10], position: [-130, -27, -36] },
-    { id: "collider2", size: [130, 20, 3], position: [-130, -27, 20] },
-    {
-      id: "collider3",
-      size: [5, 20, 65],
-      position: [-174, -27, -10],
-      rotation: [0, Math.PI / 1.06, 0],
-    },
-    {
-      id: "colider4",
-      size: [3, 20, 56],
-      position: [-160, -27, 49],
-      rotation: [0, Math.PI / -1.28, 0],
-    },
-    {
-      id: "colider5",
-      size: [3, 20, 49],
-      position: [-117, -27, 70],
-      rotation: [0, Math.PI / -2, 0],
-    },
-  ];
 
   const setColliderRef = (index) => (ref) => {
     colliderRefs.current[index] = ref;
