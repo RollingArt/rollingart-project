@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { StyleSheet, Platform, View } from "react-native";
-import { Canvas, extend } from "@react-three/fiber";
+import { Canvas, extend } from "@react-three/fiber/native";
 import * as THREE from "three";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Accelerometer } from "expo-sensors";
@@ -9,10 +9,12 @@ import { Box } from "@react-three/drei";
 import Ball from "../../src/components/Ball/Ball";
 import CameraController from "../../src/components/CameraController/CameraController";
 import TransparentObject from "../../src/components/TransparentObject/TransparentObject";
+import ColliderBox from "../../src/components/ColliderBox/ColliderBox";
 
 import ModelLoader from "../../src/hooks/ModelLoader";
 import ExtractPathVertices from "../../src/hooks/ExtractPathVertices";
 import getAssetUri from "../../src/utils/getAssetUri";
+import colliderBoxes from "../../src/utils/colliderBoxes";
 
 import patternTexture from "../../assets/images/patternTexture.png";
 import patternTextureSecond from "../../assets/images/patternTextureSecond.png";
@@ -20,22 +22,28 @@ import patternTextureThird from "../../assets/images/patternTextureThird.png";
 
 extend(THREE);
 
-function EventZone({ zoneRef, position, boxColor, size }) {
+function EventZone({ zoneRef, position, boxColor, size, rotation }) {
   return (
-    <Box ref={zoneRef} args={size} position={position}>
-      <meshStandardMaterial args={[{ color: boxColor, transparent: true, opacity: 0.5 }]} />
+    <Box ref={zoneRef} args={size} position={position} rotation={rotation}>
+      <meshStandardMaterial args={[{ color: boxColor, transparent: true, opacity: 0.3 }]} />
     </Box>
   );
 }
 
 function StageOneLand({ setLandRef }) {
-  const [modelUri, setModelUri] = useState(null);
+  const [landModelUri, setLandModelUri] = useState(null);
+  const [landTextureUri, setLandTextureUri] = useState(null);
   const [model, setModel] = useState(null);
 
   useEffect(() => {
     async function loadModel() {
-      const uri = await getAssetUri(require("../../assets/models/stageOne.glb"));
-      setModelUri(uri);
+      const modelUri = await getAssetUri(require("../../assets/models/stageOne.glb"));
+      const textureUri = await getAssetUri(require("../../assets/images/stageOneTexture.jpg"));
+
+      if (modelUri && textureUri) {
+        setLandModelUri(modelUri);
+        setLandTextureUri(textureUri);
+      }
     }
     loadModel();
   }, []);
@@ -46,12 +54,12 @@ function StageOneLand({ setLandRef }) {
     }
   }, [model, setLandRef]);
 
-  if (!modelUri) return null;
+  if (!landModelUri || !landTextureUri) return null;
 
   return (
     <>
-      <ModelLoader modelUri={modelUri} onLoad={setModel} />
-      {model && <primitive object={model} position={[0, -30, 0]} />}
+      <ModelLoader modelUri={landModelUri} textureUri={landTextureUri} onLoad={setModel} />
+      {model && <primitive object={model} position={[0, -30, 0]} receiveShadow />}
       {model && <ExtractPathVertices model={model} />}
     </>
   );
@@ -61,10 +69,10 @@ export default function Game3DScreen({ isOverlayVisible, onGameStart, onGameOver
   // eslint-disable-next-line no-unused-vars
   const [ballPath, setBallPath] = useState([]);
   const ballMeshRef = useRef();
-
   const landRef = useRef();
   const startZoneRef = useRef();
   const endZoneRef = useRef();
+  const colliderRefs = useRef([]);
 
   const [accelData, setAccelData] = useState({ x: 0, y: 0, z: 0 });
   const initialTilt = useRef({ x: 0, y: 0, z: 0 });
@@ -75,6 +83,10 @@ export default function Game3DScreen({ isOverlayVisible, onGameStart, onGameOver
   const [patternIndex, setPatternIndex] = useState(0);
   const patterns = useMemo(() => [patternTexture, patternTextureSecond, patternTextureThird]);
   const selectedPattern = patterns[patternIndex];
+
+  const setColliderRef = (index) => (ref) => {
+    colliderRefs.current[index] = ref;
+  };
 
   function normalizeSensorData(data) {
     if (Platform.OS === "android") {
@@ -141,9 +153,10 @@ export default function Game3DScreen({ isOverlayVisible, onGameStart, onGameOver
 
   return (
     <>
-      <Canvas style={styles.container}>
-        <ambientLight />
-        <directionalLight position={[10, 10, 10]} intensity={1} castShadow />
+      <Canvas style={styles.container} shadows>
+        <ambientLight color={0xadd8e6} intensity={0.3} />
+        <ambientLight color={0xffffff} intensity={0.6} />
+        <directionalLight color={0xffffff} intensity={1} position={[5, 5, 5]} castShadow />
         <CameraController followTarget={ballMeshRef} />
         <Ball
           ballMeshRef={ballMeshRef}
@@ -157,25 +170,40 @@ export default function Game3DScreen({ isOverlayVisible, onGameStart, onGameOver
           landRef={landRef}
           startZoneRef={startZoneRef}
           endZoneRef={endZoneRef}
+          colliderRefs={colliderRefs}
           onGameStart={onGameStart}
           onGameOver={onGameOver}
+          castShadow
         />
         <TransparentObject ballMeshRef={ballMeshRef} velocity={velocity} />
         <StageOneLand setLandRef={setLandRef} />
         <EventZone
           zoneRef={startZoneRef}
           onGameStart={onGameStart}
-          position={[-60, -5, 50]}
+          position={[-86, -25, -7]}
+          rotation={[0, Math.PI / 34, 0]}
           boxColor="red"
-          size={[20, 20, 20]}
+          size={[7, 32, 53]}
         />
         <EventZone
           zoneRef={endZoneRef}
           onGameOver={onGameOver}
-          position={[-60, -5, 0]}
+          position={[-93, -25, 50]}
+          rotation={[0, Math.PI / 28, 0]}
           boxColor="blue"
-          size={[20, 20, 20]}
+          size={[7, 32, 53]}
         />
+        {colliderBoxes.map((box, index) => {
+          return (
+            <ColliderBox
+              key={box.id}
+              size={box.size}
+              position={box.position}
+              rotation={box.rotation}
+              ref={setColliderRef(index)}
+            />
+          );
+        })}
       </Canvas>
       {isOverlayVisible && <View style={styles.overlayContainer} />}
     </>
@@ -185,7 +213,7 @@ export default function Game3DScreen({ isOverlayVisible, onGameStart, onGameOver
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#DAF7D9",
+    backgroundColor: "#FCFEFF",
   },
   overlayContainer: {
     ...StyleSheet.absoluteFillObject,

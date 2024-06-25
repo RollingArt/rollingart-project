@@ -15,12 +15,20 @@ export default function Ball({
   landRef,
   startZoneRef,
   endZoneRef,
+  colliderRefs,
   onGameOver,
   onGameStart,
 }) {
   const accumulatedQuaternion = useRef(new THREE.Quaternion());
-  const position = useRef({ ...initialPosition });
-  const velocity = useRef({ ...initialVelocity });
+  const position = useRef(
+    new THREE.Vector3(initialPosition.x, initialPosition.y, initialPosition.z),
+  );
+  const velocity = useRef(
+    new THREE.Vector3(initialVelocity.x, initialVelocity.y, initialVelocity.z),
+  );
+  const previousPosition = useRef(
+    new THREE.Vector3(initialPosition.x, initialPosition.y, initialPosition.z),
+  );
 
   const gravity = -9.8;
   const raycaster = useRef(new THREE.Raycaster());
@@ -73,6 +81,8 @@ export default function Ball({
 
   useFrame((_, delta) => {
     if (ballMeshRef?.current && position?.current && landRef?.current) {
+      previousPosition.current = { ...position.current };
+
       const adjustedX = accelData.x * 2 - initialTilt.current.x;
       const adjustedY = -(accelData.y * 2 - initialTilt.current.y);
 
@@ -82,8 +92,9 @@ export default function Ball({
       );
       const intersects = raycaster.current.intersectObject(landRef.current, true);
 
-      let landSlopleX = 0;
-      let landSlopleY = 0;
+      let landSlopeX = 0;
+      let landSlopeY = 0;
+      const slopeThreshold = 0.1;
 
       if (intersects.length > 0) {
         const landHeight = intersects[0].point.y;
@@ -94,14 +105,14 @@ export default function Ball({
         }
 
         const { normal } = intersects[0].face;
-        landSlopleX = normal.x;
-        landSlopleY = normal.y;
+        landSlopeX = Math.abs(normal.x) > slopeThreshold ? normal.x : 0;
+        landSlopeY = Math.abs(normal.y) > slopeThreshold ? normal.y : 0;
       } else if (position.current.y < deadZoneHeight) {
         runOnJS(onGameOver)();
       }
 
-      velocity.current.x += (adjustedX + landSlopleX) * delta * 8;
-      velocity.current.z += (adjustedY + landSlopleY) * delta * 8;
+      velocity.current.x += (adjustedX + landSlopeX) * delta * 8;
+      velocity.current.z += (adjustedY + landSlopeY) * delta * 8;
       velocity.current.y += gravity * delta;
 
       velocity.current.x *= 1 - friction * delta;
@@ -145,6 +156,16 @@ export default function Ball({
         }
       }
 
+      const colliders = [...colliderRefs.current];
+      const collisionDetected = colliders.some((collider) =>
+        new THREE.Box3().setFromObject(collider).containsPoint(position.current),
+      );
+
+      if (collisionDetected) {
+        position.current.copy(previousPosition.current);
+        velocity.current.set(0, 0, 0);
+      }
+
       positionX.value = position.current.x;
       positionY.value = position.current.y;
       positionZ.value = position.current.z;
@@ -157,7 +178,7 @@ export default function Ball({
   });
 
   return (
-    <mesh ref={ballMeshRef}>
+    <mesh ref={ballMeshRef} castShadow>
       <sphereGeometry args={[1, 16, 16]} />
       <meshStandardMaterial map={texture} />
     </mesh>
