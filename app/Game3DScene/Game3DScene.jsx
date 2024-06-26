@@ -65,7 +65,13 @@ function StageOneLand({ setLandRef }) {
   );
 }
 
-export default function Game3DScreen({ isOverlayVisible, onGameStart, onGameOver }) {
+export default function Game3DScreen({
+  isOverlayVisible,
+  onGameStart,
+  onGameOver,
+  isPaused,
+  reloadKey,
+}) {
   // eslint-disable-next-line no-unused-vars
   const [ballPath, setBallPath] = useState([]);
   const ballMeshRef = useRef();
@@ -132,7 +138,7 @@ export default function Game3DScreen({ isOverlayVisible, onGameStart, onGameOver
     return () => {
       accelSubscription.remove();
     };
-  }, []);
+  }, [reloadKey]);
 
   const distance = (pos1, pos2) =>
     Math.sqrt((pos1.x - pos2.x) ** 2 + (pos1.y - pos2.y) ** 2 + (pos1.z - pos2.z) ** 2);
@@ -173,6 +179,7 @@ export default function Game3DScreen({ isOverlayVisible, onGameStart, onGameOver
           colliderRefs={colliderRefs}
           onGameStart={onGameStart}
           onGameOver={onGameOver}
+          isPaused={isPaused}
           castShadow
         />
         <TransparentObject ballMeshRef={ballMeshRef} velocity={velocity} />

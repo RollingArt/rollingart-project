@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useSharedValue, runOnJS } from "react-native-reanimated";
@@ -18,6 +18,7 @@ export default function Ball({
   colliderRefs,
   onGameOver,
   onGameStart,
+  isPaused,
 }) {
   const accumulatedQuaternion = useRef(new THREE.Quaternion());
   const position = useRef(
@@ -61,8 +62,8 @@ export default function Ball({
 
     if (frameCount.current % updateInterval === 0) {
       const deltaX = positionX.value - previousPositionRef.current.x;
-      const daltaY = positionZ.value - previousPositionRef.current.z;
-      const distance = Math.sqrt(deltaX * deltaX + daltaY * daltaY);
+      const deltaY = positionZ.value - previousPositionRef.current.z;
+      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
       if (distance >= distanceThreshold) {
         runOnJS(onPathUpdate)({
@@ -80,8 +81,10 @@ export default function Ball({
   }
 
   useFrame((_, delta) => {
+    if (isPaused) return;
+
     if (ballMeshRef?.current && position?.current && landRef?.current) {
-      previousPosition.current = { ...position.current };
+      previousPosition.current.copy(position.current);
 
       const adjustedX = accelData.x * 2 - initialTilt.current.x;
       const adjustedY = -(accelData.y * 2 - initialTilt.current.y);

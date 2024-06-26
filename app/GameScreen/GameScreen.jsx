@@ -1,7 +1,8 @@
-import { useState } from "react";
-import { View, TouchableOpacity, Image, Text, StyleSheet } from "react-native";
-import { router } from "expo-router";
+import { useEffect, useRef, useState } from "react";
+import { View, TouchableOpacity, Image, Text, StyleSheet, AppState } from "react-native";
+import { useRouter } from "expo-router";
 import { vh, vw } from "react-native-expo-viewport-units";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import Game3DScene from "../Game3DScene/Game3DScene";
 import useTimer from "../../src/hooks/useTimer";
@@ -14,37 +15,91 @@ import playButtonImage from "../../assets/images/play.png";
 import increaseImage from "../../assets/images/increase.png";
 import decreaseImage from "../../assets/images/decrease.png";
 
+const GAME_STATE_KEY = "gameState";
+
 export default function GameScreen() {
   const [sensitiveCount, setSensitiveCount] = useState(5);
-
   const [isPauseButtonVisible, setIsPauseButtonVisible] = useState(true);
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
-
+  const [isPaused, setIsPaused] = useState(false);
   const [isMainModalVisible, setIsMainModalVisible] = useState(false);
   const [isGameResultModalVisible, setIsGameResultModalVisible] = useState(false);
 
   const initialTime = 60;
-  const { timeLeft, startTimer, stopTimer, resetTimer } = useTimer(initialTime);
+  const { timeLeft, startTimer, stopTimer, resetTimer, setTimeLeft } = useTimer(initialTime);
 
-  function handleGamePauseToggle() {
+  const router = useRouter();
+  const appState = useRef(AppState.currentState);
+  const hasGameStarted = useRef(true);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", handleAppStateChange);
+
+    return () => {
+      subscription.remove();
+    };
+  }, [timeLeft, isPaused, sensitiveCount, isPauseButtonVisible]);
+
+  async function handleAppStateChange(nextAppState) {
+    if (appState.current.match(/inactive|background/) && nextAppState === "active") {
+      await loadGameState();
+    } else if (nextAppState.match(/inactive|background/)) {
+      if (hasGameStarted.current) {
+        handleGamePauseButtonTouch();
+        await saveGameState();
+      }
+    }
+    appState.current = nextAppState;
+  }
+
+  async function saveGameState() {
+    const gameState = {
+      timeLeft,
+      isPaused: true,
+      sensitiveCount,
+      isPauseButtonVisible: false,
+    };
+    await AsyncStorage.setItem(GAME_STATE_KEY, JSON.stringify(gameState));
+  }
+
+  async function loadGameState() {
+    const savedState = await AsyncStorage.getItem(GAME_STATE_KEY);
+
+    if (savedState) {
+      const gameState = JSON.parse(savedState);
+
+      setTimeLeft(gameState.timeLeft);
+      setSensitiveCount(gameState.sensitiveCount);
+      setIsPauseButtonVisible(gameState.isPauseButtonVisible);
+      setIsPaused(gameState.isPaused);
+    }
+  }
+
+  function handleGamePauseButtonTouch() {
     if (isPauseButtonVisible) {
       setIsPauseButtonVisible(false);
       setIsOverlayVisible(true);
+      setIsPaused(true);
       stopTimer();
-    } else {
-      setIsPauseButtonVisible(true);
-      setIsOverlayVisible(false);
-      startTimer();
     }
+  }
+
+  function handleGameResumeButtonTouch() {
+    setIsPauseButtonVisible(true);
+    setIsOverlayVisible(false);
+    setIsPaused(false);
+    startTimer();
   }
 
   function handleMainButtonTouch() {
     setIsMainModalVisible(true);
+    setIsPaused(true);
     stopTimer();
   }
 
   function handleRightButtonTouch() {
     setIsMainModalVisible(false);
+    setIsPaused(false);
     startTimer();
   }
 
@@ -53,7 +108,7 @@ export default function GameScreen() {
     resetTimer();
   }
 
-  function handleIncreseCount() {
+  function handleIncreaseCount() {
     if (sensitiveCount < 9 && increaseImage) {
       setSensitiveCount((prevCount) => prevCount + 1);
     }
@@ -66,11 +121,13 @@ export default function GameScreen() {
   }
 
   function onGameStart() {
+    hasGameStarted.current = true;
     startTimer();
   }
 
   function onGameOver() {
     setIsGameResultModalVisible(true);
+    setIsPaused(true);
     stopTimer();
   }
 
@@ -81,6 +138,8 @@ export default function GameScreen() {
           isOverlayVisible={isOverlayVisible}
           onGameStart={onGameStart}
           onGameOver={onGameOver}
+          isPaused={isPaused}
+          reloadKey={appState.current}
         />
         <View style={styles.uiContainer}>
           <TouchableOpacity onPress={handleMainButtonTouch}>
@@ -91,11 +150,11 @@ export default function GameScreen() {
             <Text style={styles.timeText}>{timeLeft}</Text>
           </View>
           {isPauseButtonVisible ? (
-            <TouchableOpacity onPress={handleGamePauseToggle}>
+            <TouchableOpacity onPress={handleGamePauseButtonTouch}>
               <Image style={styles.Images} source={pauseButtonImage} />
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity onPress={handleGamePauseToggle}>
+            <TouchableOpacity onPress={handleGameResumeButtonTouch}>
               <Image style={styles.Images} source={playButtonImage} />
             </TouchableOpacity>
           )}
@@ -105,7 +164,7 @@ export default function GameScreen() {
             <Image style={styles.Images} source={decreaseImage} />
           </TouchableOpacity>
           <Text style={styles.countText}>{sensitiveCount}</Text>
-          <TouchableOpacity onPress={handleIncreseCount}>
+          <TouchableOpacity onPress={handleIncreaseCount}>
             <Image style={styles.Images} source={increaseImage} />
           </TouchableOpacity>
         </View>
