@@ -38,7 +38,7 @@ export default function GameScreen() {
     return () => {
       subscription.remove();
     };
-  });
+  }, [timeLeft, isPaused, sensitiveCount, isPauseButtonVisible]);
 
   async function handleAppStateChange(nextAppState) {
     if (appState.current.match(/inactive|background/) && nextAppState === "active") {
