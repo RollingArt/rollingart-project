@@ -8,13 +8,13 @@ import StaticBall from "../StaticBall/StaticBall";
 
 import arrowButtonImage from "../../../assets/images/arrowButton.png";
 import circleImage from "../../../assets/images/circle.png";
-import patternTexture from "../../../assets/images/patternTexture.png";
-import patternTextureSecond from "../../../assets/images/patternTextureSecond.png";
-import patternTextureThird from "../../../assets/images/patternTextureThird.png";
+import patternTexture1 from "../../../assets/images/patternTexture1.png";
+import patternTexture2 from "../../../assets/images/patternTexture2.png";
+import patternTexture3 from "../../../assets/images/patternTexture3.png";
 
 export default function BallCustomization() {
   const [patternIndex, setPatternIndex] = useState(0);
-  const patterns = [patternTexture, patternTextureSecond, patternTextureThird];
+  const patterns = [patternTexture1, patternTexture2, patternTexture3];
 
   useEffect(() => {
     AsyncStorage.setItem("selectedPatternIndex", patternIndex.toString());

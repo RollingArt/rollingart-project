@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { View, TouchableOpacity, Image, Text, StyleSheet, AppState } from "react-native";
-import { GLView } from "expo-gl";
 import { useRouter } from "expo-router";
 import { vh, vw } from "react-native-expo-viewport-units";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -18,14 +17,14 @@ import decreaseImage from "../../assets/images/decrease.png";
 
 const GAME_STATE_KEY = "gameState";
 
-export default function GameScreen() {
+export default function Stage1Screen() {
   const [sensitiveCount, setSensitiveCount] = useState(5);
   const [isPauseButtonVisible, setIsPauseButtonVisible] = useState(true);
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isMainModalVisible, setIsMainModalVisible] = useState(false);
   const [isGameResultModalVisible, setIsGameResultModalVisible] = useState(false);
-  const [glContext, setGLContext] = useState(null);
+  const [gameResultMessage, setGameResultMessage] = useState("");
 
   const initialTime = 60;
   const { timeLeft, startTimer, stopTimer, resetTimer, setTimeLeft } = useTimer(initialTime);
@@ -34,10 +33,14 @@ export default function GameScreen() {
   const appState = useRef(AppState.currentState);
   const hasGameStarted = useRef(true);
 
-  const glRef = useRef();
+  const currentStage = 1;
 
   useEffect(() => {
     const subscription = AppState.addEventListener("change", handleAppStateChange);
+
+    if (timeLeft === 0) {
+      onGameOver("timeout");
+    }
 
     return () => {
       subscription.remove();
@@ -129,32 +132,23 @@ export default function GameScreen() {
     startTimer();
   }
 
-  function onGameOver() {
+  function onGameOver(message) {
     setIsGameResultModalVisible(true);
     setIsPaused(true);
     stopTimer();
+    setGameResultMessage(message);
   }
-
-  const onContextCreate = useCallback((gl) => {
-    glRef.current = gl;
-    setGLContext(gl);
-  }, []);
 
   return (
     <>
       <View style={styles.container}>
-        <GLView style={styles.glView} onContextCreate={onContextCreate} />
-        {glContext && (
-          <View style={styles.canvasContainer}>
-            <Game3DScene
-              isOverlayVisible={isOverlayVisible}
-              onGameStart={onGameStart}
-              onGameOver={onGameOver}
-              isPaused={isPaused}
-              glContext={glContext}
-            />
-          </View>
-        )}
+        <Game3DScene
+          isOverlayVisible={isOverlayVisible}
+          onGameStart={onGameStart}
+          onGameOver={onGameOver}
+          isPaused={isPaused}
+          reloadKey={appState.current}
+        />
         <View style={styles.uiContainer}>
           <TouchableOpacity onPress={handleMainButtonTouch}>
             <Image style={styles.Images} source={MainButtonImage} />
@@ -183,7 +177,12 @@ export default function GameScreen() {
           </TouchableOpacity>
         </View>
       </View>
-      <GameResultModal visible={isGameResultModalVisible} />
+      <GameResultModal
+        visible={isGameResultModalVisible}
+        currentStage={currentStage}
+        gameResultMessage={gameResultMessage}
+        timeLeft={timeLeft}
+      />
       <ConfirmationModal
         visible={isMainModalVisible}
         onLeftButtonTouch={handleLeftButtonTouch}
@@ -197,15 +196,6 @@ export default function GameScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    position: "relative",
-  },
-  glView: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-  },
-  canvasContainer: {
-    ...StyleSheet.absoluteFillObject,
   },
   uiContainer: {
     flexDirection: "row",

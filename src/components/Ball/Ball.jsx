@@ -78,7 +78,7 @@ export default function Ball({
   }, [currentBallPatternTexture]);
 
   const dynamicTexture = useMemo(() => {
-    const size = 512;
+    const size = 1024;
     const data = new Uint8Array(size * size * 4);
     for (let i = 0; i < size * size * 4; i += 4) {
       data[i] = 0;
@@ -93,9 +93,9 @@ export default function Ball({
 
   const updateTexture = useCallback(
     (uvX, uvY) => {
-      const radius = 2;
-      const width = 512;
-      const height = 512;
+      const radius = 4;
+      const width = 1024;
+      const height = 1024;
 
       const radiusSquared = radius * radius;
 
@@ -116,21 +116,21 @@ export default function Ball({
         }
       }
 
-      const gl = glContext;
-      if (gl) {
-        gl.bindTexture(gl.TEXTURE_2D, dynamicTexture.__webglTexture);
-        gl.texSubImage2D(
-          gl.TEXTURE_2D,
+      dynamicTexture.needsUpdate = true;
+
+      if (glContext) {
+        glContext.bindTexture(glContext.TEXTURE_2D, dynamicTexture.__webglTexture);
+        glContext.texSubImage2D(
+          glContext.TEXTURE_2D,
           0,
           0,
           0,
           width,
           height,
-          gl.RGBA,
-          gl.UNSIGNED_BYTE,
+          glContext.RGBA,
+          glContext.UNSIGNED_BYTE,
           dynamicTexture.image.data,
         );
-        dynamicTexture.needsUpdate = true;
       }
     },
     [dynamicTexture, glContext],
@@ -191,7 +191,7 @@ export default function Ball({
       landSlopeX = Math.abs(normal.x) > slopeThreshold ? normal.x : 0;
       landSlopeY = Math.abs(normal.y) > slopeThreshold ? normal.y : 0;
     } else if (position.current.y < deadZoneHeight) {
-      runOnJS(onGameOver)();
+      runOnJS(onGameOver)("fall");
     }
 
     velocity.current.x += (adjustedX + landSlopeX) * delta * 8;
@@ -231,7 +231,7 @@ export default function Ball({
         runOnJS(onGameStart)();
       }
       if (endBox.containsPoint(ballPosition)) {
-        runOnJS(onGameOver)();
+        runOnJS(onGameOver)("finish");
       }
     }
 
@@ -258,6 +258,7 @@ export default function Ball({
         position.current.y,
         position.current.z,
       );
+
       landRef.current.traverse((child) => {
         if (
           child.isMesh &&
@@ -276,8 +277,8 @@ export default function Ball({
     updateBallPath();
     const uv = intersects[0]?.uv;
     if (uv) {
-      const uvX = Math.floor(uv.x * 512);
-      const uvY = Math.floor(uv.y * 512);
+      const uvX = Math.floor(uv.x * 1024);
+      const uvY = Math.floor(uv.y * 1024);
       updateTexture(uvX, uvY);
     }
   });
