@@ -56,7 +56,7 @@ export default function ModelLoader({
   textureUri,
   onLoad,
   dynamicTexture,
-  ballPosition,
+  ballPosition = { x: 0, y: 0, z: 0 },
   brushRadius,
 }) {
   const { scene } = useGLTF(modelUri);

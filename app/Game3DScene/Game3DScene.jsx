@@ -70,6 +70,7 @@ export default function Game3DScreen({
   onGameOver,
   isPaused,
   reloadKey,
+  glContext,
 }) {
   // eslint-disable-next-line no-unused-vars
   const [ballPath, setBallPath] = useState([]);
@@ -157,8 +158,8 @@ export default function Game3DScreen({
   }, []);
 
   return (
-    <>
-      <Canvas style={styles.container} shadows>
+    <View style={styles.container}>
+      <Canvas style={styles.viewContainer} gl={glContext} shadows>
         <ambientLight color={0xffffff} intensity={1} />
         <directionalLight color={0xffffff} intensity={1} position={[5, 5, 5]} castShadow />
         <CameraController followTarget={ballMeshRef} />
@@ -178,6 +179,7 @@ export default function Game3DScreen({
           onGameStart={onGameStart}
           onGameOver={onGameOver}
           isPaused={isPaused}
+          glContext={glContext}
           castShadow
         />
         <StageOneLand setLandRef={setLandRef} />
@@ -210,7 +212,7 @@ export default function Game3DScreen({
         })}
       </Canvas>
       {isOverlayVisible && <View style={styles.overlayContainer} />}
-    </>
+    </View>
   );
 }
 
@@ -218,6 +220,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FCFEFF",
+  },
+  viewContainer: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
   },
   overlayContainer: {
     ...StyleSheet.absoluteFillObject,

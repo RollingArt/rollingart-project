@@ -32,6 +32,7 @@ module.exports = {
     "react/no-unknown-property": ["error", { ignore: ["position", "args", "map", "rotation", "intensity", "castShadow", "receiveShadow", "object", "transparent"] }],
     "no-param-reassign": ["error", { "props": true, "ignorePropertyModificationsFor": ["texture", "child","landRef"]}],
     "no-unused-vars": "error",
+    "no-underscore-dangle": ["error", { "allow": ["__webglTexture"] }],
     quotes: ["error", "double"],
     semi: ["error", "always"],
     eqeqeq: ["error", "always"],
