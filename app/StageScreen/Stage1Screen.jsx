@@ -17,13 +17,14 @@ import decreaseImage from "../../assets/images/decrease.png";
 
 const GAME_STATE_KEY = "gameState";
 
-export default function GameScreen() {
+export default function Stage1Screen() {
   const [sensitiveCount, setSensitiveCount] = useState(5);
   const [isPauseButtonVisible, setIsPauseButtonVisible] = useState(true);
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isMainModalVisible, setIsMainModalVisible] = useState(false);
   const [isGameResultModalVisible, setIsGameResultModalVisible] = useState(false);
+  const [gameResultMessage, setGameResultMessage] = useState("");
 
   const initialTime = 60;
   const { timeLeft, startTimer, stopTimer, resetTimer, setTimeLeft } = useTimer(initialTime);
@@ -32,8 +33,14 @@ export default function GameScreen() {
   const appState = useRef(AppState.currentState);
   const hasGameStarted = useRef(true);
 
+  const currentStage = 1;
+
   useEffect(() => {
     const subscription = AppState.addEventListener("change", handleAppStateChange);
+
+    if (timeLeft === 0) {
+      onGameOver("timeout");
+    }
 
     return () => {
       subscription.remove();
@@ -125,10 +132,11 @@ export default function GameScreen() {
     startTimer();
   }
 
-  function onGameOver() {
+  function onGameOver(message) {
     setIsGameResultModalVisible(true);
     setIsPaused(true);
     stopTimer();
+    setGameResultMessage(message);
   }
 
   return (
@@ -169,7 +177,12 @@ export default function GameScreen() {
           </TouchableOpacity>
         </View>
       </View>
-      <GameResultModal visible={isGameResultModalVisible} />
+      <GameResultModal
+        visible={isGameResultModalVisible}
+        currentStage={currentStage}
+        gameResultMessage={gameResultMessage}
+        timeLeft={timeLeft}
+      />
       <ConfirmationModal
         visible={isMainModalVisible}
         onLeftButtonTouch={handleLeftButtonTouch}

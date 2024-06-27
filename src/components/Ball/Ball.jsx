@@ -111,7 +111,7 @@ export default function Ball({
         landSlopeX = Math.abs(normal.x) > slopeThreshold ? normal.x : 0;
         landSlopeY = Math.abs(normal.y) > slopeThreshold ? normal.y : 0;
       } else if (position.current.y < deadZoneHeight) {
-        runOnJS(onGameOver)();
+        runOnJS(onGameOver)("fall");
       }
 
       velocity.current.x += (adjustedX + landSlopeX) * delta * 8;
@@ -155,7 +155,7 @@ export default function Ball({
           runOnJS(onGameStart)();
         }
         if (endBox.containsPoint(ballPosition)) {
-          runOnJS(onGameOver)();
+          runOnJS(onGameOver)("finish");
         }
       }
 
