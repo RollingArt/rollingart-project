@@ -8,7 +8,6 @@ import { Box } from "@react-three/drei";
 
 import Ball from "../../src/components/Ball/Ball";
 import CameraController from "../../src/components/CameraController/CameraController";
-import TransparentObject from "../../src/components/TransparentObject/TransparentObject";
 import ColliderBox from "../../src/components/ColliderBox/ColliderBox";
 
 import ModelLoader from "../../src/hooks/ModelLoader";
@@ -160,8 +159,7 @@ export default function Game3DScreen({
   return (
     <>
       <Canvas style={styles.container} shadows>
-        <ambientLight color={0xadd8e6} intensity={0.3} />
-        <ambientLight color={0xffffff} intensity={0.6} />
+        <ambientLight color={0xffffff} intensity={1} />
         <directionalLight color={0xffffff} intensity={1} position={[5, 5, 5]} castShadow />
         <CameraController followTarget={ballMeshRef} />
         <Ball
@@ -182,7 +180,6 @@ export default function Game3DScreen({
           isPaused={isPaused}
           castShadow
         />
-        <TransparentObject ballMeshRef={ballMeshRef} velocity={velocity} />
         <StageOneLand setLandRef={setLandRef} />
         <EventZone
           zoneRef={startZoneRef}

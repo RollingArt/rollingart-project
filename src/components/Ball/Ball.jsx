@@ -1,7 +1,9 @@
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useEffect, useState, useCallback } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useSharedValue, runOnJS } from "react-native-reanimated";
+import ModelLoader from "../../hooks/ModelLoader";
+import getAssetUri from "../../utils/getAssetUri";
 
 export default function Ball({
   currentBallPatternTexture,
@@ -12,14 +14,17 @@ export default function Ball({
   initialTilt,
   ballMeshRef,
   onPathUpdate,
-  landRef,
   startZoneRef,
   endZoneRef,
   colliderRefs,
   onGameOver,
   onGameStart,
   isPaused,
+  landRef,
 }) {
+  const [landModelUri, setLandModelUri] = useState(null);
+  const [landTextureUri, setLandTextureUri] = useState(null);
+
   const accumulatedQuaternion = useRef(new THREE.Quaternion());
   const position = useRef(
     new THREE.Vector3(initialPosition.x, initialPosition.y, initialPosition.z),
@@ -48,7 +53,20 @@ export default function Ball({
 
   const deadZoneHeight = -80;
 
-  const texture = useMemo(() => {
+  useEffect(() => {
+    async function loadModel() {
+      const modelUri = await getAssetUri(require("../../../assets/models/stageOne.glb"));
+      const textureUri = await getAssetUri(require("../../../assets/images/stageOneTexture.jpg"));
+
+      if (modelUri && textureUri) {
+        setLandModelUri(modelUri);
+        setLandTextureUri(textureUri);
+      }
+    }
+    loadModel();
+  }, []);
+
+  const ballTexture = useMemo(() => {
     const ballPatternTexture = new THREE.TextureLoader().load(currentBallPatternTexture);
     ballPatternTexture.wrapS = THREE.RepeatWrapping;
     ballPatternTexture.wrapT = THREE.RepeatWrapping;
@@ -56,6 +74,49 @@ export default function Ball({
 
     return ballPatternTexture;
   }, [currentBallPatternTexture]);
+
+  const dynamicTexture = useMemo(() => {
+    const size = 512;
+    const data = new Uint8Array(size * size * 4);
+    for (let i = 0; i < size * size * 4; i += 4) {
+      data[i] = 0;
+      data[i + 1] = 0;
+      data[i + 2] = 0;
+      data[i + 3] = 0;
+    }
+    const texture = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
+    texture.needsUpdate = true;
+    return texture;
+  }, []);
+
+  const updateTexture = useCallback(
+    (uvX, uvY) => {
+      const radius = 2;
+      const width = 512;
+      const height = 512;
+
+      const radiusSquared = radius * radius;
+
+      for (let i = -radius; i <= radius; i++) {
+        for (let j = -radius; j <= radius; j++) {
+          const distanceSquared = i * i + j * j;
+          if (distanceSquared <= radiusSquared) {
+            const xi = uvX + i;
+            const yj = uvY + j;
+            if (xi >= 0 && xi < width && yj >= 0 && yj < height) {
+              const index = (yj * width + xi) * 4;
+              dynamicTexture.image.data[index] = 255;
+              dynamicTexture.image.data[index + 1] = 165;
+              dynamicTexture.image.data[index + 2] = 0;
+              dynamicTexture.image.data[index + 3] = 255;
+            }
+          }
+        }
+      }
+      dynamicTexture.needsUpdate = true;
+    },
+    [dynamicTexture],
+  );
 
   function updateBallPath() {
     frameCount.current += 1;
@@ -176,14 +237,55 @@ export default function Ball({
       rotationX.value = accumulatedQuaternion.current.x;
       rotationZ.value = accumulatedQuaternion.current.z;
 
+      if (landRef.current) {
+        const ballPositionVector = new THREE.Vector3(
+          position.current.x,
+          position.current.y,
+          position.current.z,
+        );
+        landRef.current.traverse((child) => {
+          if (
+            child.isMesh &&
+            child.material &&
+            child.material.uniforms &&
+            child.material.uniforms.ballPosition
+          ) {
+            if (child.material.uniforms.ballPosition.value instanceof THREE.Vector3) {
+              child.material.uniforms.ballPosition.value.copy(ballPositionVector);
+              child.material.uniforms.dynamicTexture.value.needsUpdate = true;
+            }
+          }
+        });
+      }
+
       updateBallPath();
+      const uv = intersects[0]?.uv;
+      if (uv) {
+        const uvX = Math.floor(uv.x * 512);
+        const uvY = Math.floor(uv.y * 512);
+        updateTexture(uvX, uvY);
+      }
     }
   });
 
   return (
-    <mesh ref={ballMeshRef} castShadow>
-      <sphereGeometry args={[1, 16, 16]} />
-      <meshStandardMaterial map={texture} />
-    </mesh>
+    <>
+      <mesh ref={ballMeshRef} castShadow>
+        <sphereGeometry args={[1, 16, 16]} />
+        <meshStandardMaterial map={ballTexture} />
+      </mesh>
+      {landModelUri && (
+        <ModelLoader
+          modelUri={landModelUri}
+          textureUri={landTextureUri}
+          onLoad={(scene) => {
+            landRef.current = scene;
+          }}
+          dynamicTexture={dynamicTexture}
+          ballPosition={position.current}
+          brushRadius={0.05}
+        />
+      )}
+    </>
   );
 }
