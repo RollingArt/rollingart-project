@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { vw, vh } from "react-native-expo-viewport-units";
 
 import CustomButton from "../../src/components/CustomButton/CustomButton";
@@ -13,43 +14,62 @@ function StageCardButton({
   cardDisabled,
   cardButtonStyle,
   stageLevel,
-  sterOneImage,
-  starTwoImage,
-  starThreeImage,
+  starCount,
   onStageCardPress,
+  id,
 }) {
+  const starImages = [];
+  for (let i = 0; i < 3; i++) {
+    starImages.push(
+      <Image key={i} style={styles.starImage} source={i < starCount ? filledStar : emptyStar} />,
+    );
+  }
+
   return (
-    <TouchableOpacity style={cardButtonStyle} disabled={cardDisabled} onPress={onStageCardPress}>
+    <TouchableOpacity
+      style={cardButtonStyle}
+      disabled={cardDisabled}
+      onPress={() => onStageCardPress(id)}
+    >
       <Text style={!cardDisabled ? styles.enableCardText : styles.disableCardText}>
         {stageLevel}
       </Text>
-      {!cardDisabled && (
-        <View style={styles.starWrapper}>
-          <Image style={styles.starImage} source={sterOneImage} />
-          <Image style={styles.starImage} source={starTwoImage} />
-          <Image style={styles.starImage} source={starThreeImage} />
-        </View>
-      )}
+      {!cardDisabled && <View style={styles.starWrapper}>{starImages}</View>}
     </TouchableOpacity>
   );
 }
 
 export default function StageSelectScreen() {
+  const [starCounts, setStarCounts] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedStage, setSelectedStage] = useState(null);
+  const router = useRouter();
 
-  function handleStageCardButtonTouch() {
+  useEffect(() => {
+    loadStarCounts();
+  }, []);
+
+  async function loadStarCounts() {
+    const starData = await AsyncStorage.getItem("starData");
+    if (starData) {
+      setStarCounts(JSON.parse(starData));
+    }
+  }
+
+  function handleStageCardButtonTouch(id) {
+    setSelectedStage(id);
     setIsLoading(true);
   }
 
   useEffect(() => {
-    if (isLoading) {
+    if (isLoading && selectedStage !== null) {
       router.replace("/LoadingScreen/LoadingScreen");
       setTimeout(() => {
         setIsLoading(false);
-        router.replace("/GameScreen/GameScreen");
+        router.replace(`/StageScreen/Stage${selectedStage}Screen`);
       }, 2000);
     }
-  }, [isLoading]);
+  }, [isLoading, selectedStage]);
 
   function handleMainButtonTouch() {
     router.replace("/MainScreen/MainScreen");
@@ -63,24 +83,16 @@ export default function StageSelectScreen() {
           cardDisabled={false}
           cardButtonStyle={styles.enableCardButton}
           stageLevel="Stage 1"
-          sterOneImage={filledStar}
-          starTwoImage={filledStar}
-          starThreeImage={filledStar}
+          id={1}
+          starCount={starCounts[1] || 0}
           onStageCardPress={handleStageCardButtonTouch}
         />
         <StageCardButton
           cardDisabled={false}
-          cardButtonStyle={styles.enableCardButton}
-          stageLevel="Stage 2"
-          sterOneImage={emptyStar}
-          starTwoImage={emptyStar}
-          starThreeImage={emptyStar}
-          onStageCardPress={handleStageCardButtonTouch}
-        />
-        <StageCardButton
-          cardDisabled
           cardButtonStyle={styles.disableCardButton}
-          stageLevel="Stage 3"
+          stageLevel="Stage 2"
+          id={2}
+          starCount={starCounts[2] || 0}
           onStageCardPress={handleStageCardButtonTouch}
         />
       </View>
@@ -101,17 +113,19 @@ const styles = StyleSheet.create({
   buttonContainer: {
     width: vw(30),
     height: vh(6),
+    marginTop: vh(22),
     backgroundColor: "#38D530",
     borderRadius: 5,
   },
   cardWrapper: {
     justifyContent: "space-between",
-    height: vh(64),
+    height: vh(34),
     marginVertical: 36,
   },
   enableCardButton: {
     width: vw(50),
     height: vh(18),
+    marginTop: vh(6),
     alignItems: "center",
     justifyContent: "center",
     margin: 12,
