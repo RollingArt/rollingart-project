@@ -6,14 +6,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import StaticBall from "../../src/components/StaticBall/StaticBall";
 
-import patternTexture from "../../assets/images/patternTexture.png";
-import patternTextureSecond from "../../assets/images/patternTextureSecond.png";
-import patternTextureThird from "../../assets/images/patternTextureThird.png";
+import patternTexture1 from "../../assets/images/patternTexture1.png";
+import patternTexture2 from "../../assets/images/patternTexture2.png";
+import patternTexture3 from "../../assets/images/patternTexture3.png";
 import circleImage from "../../assets/images/circle.png";
 
 export default function LoadingScreen() {
   const [patternIndex, setPatternIndex] = useState(0);
-  const patterns = useMemo(() => [patternTexture, patternTextureSecond, patternTextureThird]);
+  const patterns = useMemo(() => [patternTexture1, patternTexture2, patternTexture3]);
   const selectedPattern = patterns[patternIndex];
 
   useEffect(() => {

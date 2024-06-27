@@ -30,16 +30,16 @@ export default function GameResultModal({ visible, currentStage, gameResultMessa
   }
 
   function gameOverMessage() {
-    if (gameResultMessage === "finish") {
-      return "훌륭합니다!";
+    switch (gameResultMessage) {
+      case "finish":
+        return "훌륭합니다!";
+      case "fall":
+        return "다시 도전하세요!";
+      case "timeout":
+        return "시간이 종료되었습니다";
+      default:
+        return "오류가 발생했습니다. 다시 시도해주세요.";
     }
-    if (gameResultMessage === "fall") {
-      return "다시 도전하세요!";
-    }
-    if (gameResultMessage === "timeout") {
-      return "시간이 종료되었습니다";
-    }
-    return "";
   }
 
   function getStarCount(achievements) {
