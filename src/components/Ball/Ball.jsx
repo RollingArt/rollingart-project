@@ -19,6 +19,7 @@ export default function Ball({
   onGameOver,
   onGameStart,
   isPaused,
+  sensitiveCount,
 }) {
   const accumulatedQuaternion = useRef(new THREE.Quaternion());
   const position = useRef(
@@ -35,7 +36,7 @@ export default function Ball({
   const raycaster = useRef(new THREE.Raycaster());
 
   const previousPositionRef = useRef({ x: 0, y: 0, z: 0 });
-  const distanceThreshold = 2;
+  const distanceThreshold = 3;
   const frameCount = useRef(0);
   const updateInterval = 30;
 
@@ -47,6 +48,7 @@ export default function Ball({
   const rotationZ = useSharedValue(0);
 
   const deadZoneHeight = -80;
+  const collisionCheckInterval = 10;
 
   const texture = useMemo(() => {
     const ballPatternTexture = new THREE.TextureLoader().load(currentBallPatternTexture);
@@ -86,8 +88,15 @@ export default function Ball({
     if (ballMeshRef?.current && position?.current && landRef?.current) {
       previousPosition.current.copy(position.current);
 
-      const adjustedX = accelData.x * 2 - initialTilt.current.x;
-      const adjustedY = -(accelData.y * 2 - initialTilt.current.y);
+      const adjustedX = accelData.x - initialTilt.current.x;
+      const adjustedY = -(accelData.y - initialTilt.current.y);
+      const extraTiltX = adjustedX * 4;
+      const extraTiltY = adjustedY * 4;
+
+      let landHeight = null;
+      let landSlopeX = 0;
+      let landSlopeY = 0;
+      const slopeThreshold = 1;
 
       raycaster.current.set(
         new THREE.Vector3(position.current.x, position.current.y + 10, position.current.z),
@@ -95,12 +104,8 @@ export default function Ball({
       );
       const intersects = raycaster.current.intersectObject(landRef.current, true);
 
-      let landSlopeX = 0;
-      let landSlopeY = 0;
-      const slopeThreshold = 0.1;
-
       if (intersects.length > 0) {
-        const landHeight = intersects[0].point.y;
+        landHeight = intersects[0].point.y;
 
         if (position.current.y < landHeight + 1) {
           position.current.y = landHeight + 1;
@@ -114,16 +119,18 @@ export default function Ball({
         runOnJS(onGameOver)("fall");
       }
 
-      velocity.current.x += (adjustedX + landSlopeX) * delta * 8;
-      velocity.current.z += (adjustedY + landSlopeY) * delta * 8;
+      velocity.current.x += (extraTiltX + landSlopeX) * delta * (sensitiveCount + 3);
+      velocity.current.z += (extraTiltY + landSlopeY) * delta * (sensitiveCount + 3);
       velocity.current.y += gravity * delta;
 
       velocity.current.x *= 1 - friction * delta;
       velocity.current.z *= 1 - friction * delta;
 
-      position.current.x += velocity.current.x * delta * 3;
-      position.current.z += velocity.current.z * delta * 3;
-      position.current.y += velocity.current.y * delta * 3;
+      if (Math.abs(velocity.current.x) > 0.1 || Math.abs(velocity.current.z) > 0.1) {
+        position.current.x += velocity.current.x * delta * 2;
+        position.current.z += velocity.current.z * delta * 2;
+        position.current.y += velocity.current.y * delta * 2;
+      }
 
       const moveDirection = new THREE.Vector3(
         velocity.current.x,
@@ -159,14 +166,16 @@ export default function Ball({
         }
       }
 
-      const colliders = [...colliderRefs.current];
-      const collisionDetected = colliders.some((collider) =>
-        new THREE.Box3().setFromObject(collider).containsPoint(position.current),
-      );
+      if (frameCount.current % collisionCheckInterval === 0) {
+        const colliders = [...colliderRefs.current];
+        const collisionDetected = colliders.some((collider) =>
+          new THREE.Box3().setFromObject(collider).containsPoint(position.current),
+        );
 
-      if (collisionDetected) {
-        position.current.copy(previousPosition.current);
-        velocity.current.set(0, 0, 0);
+        if (collisionDetected) {
+          position.current.copy(previousPosition.current);
+          velocity.current.set(0, 0, 0);
+        }
       }
 
       positionX.value = position.current.x;
