@@ -222,42 +222,6 @@ export default function Ball({
         mesh.quaternion.copy(accumulatedQuaternion.current);
         mesh.position.set(position.current.x, position.current.y, position.current.z);
 
-        const ballCurrentPosition = mesh.position;
-        const startBox = new THREE.Box3().setFromObject(startZoneRef.current);
-        const endBox = new THREE.Box3().setFromObject(endZoneRef.current);
-
-        if (startBox.containsPoint(ballCurrentPosition)) {
-          runOnJS(onGameStart)();
-        }
-        if (endBox.containsPoint(ballCurrentPosition)) {
-          runOnJS(onGameOver)("finish");
-        }
-      }
-
-      if (frameCount.current % collisionCheckInterval === 0) {
-        const colliders = [...colliderRefs.current];
-        const collisionDetected = colliders.some((collider) =>
-          new THREE.Box3().setFromObject(collider).containsPoint(position.current),
-        );
-
-        if (collisionDetected) {
-          position.current.copy(previousPosition.current);
-          velocity.current.set(0, 0, 0);
-        }
-      }
-
-      positionX.value = position.current.x;
-      positionY.value = position.current.y;
-      positionZ.value = position.current.z;
-
-      rotationX.value = accumulatedQuaternion.current.x;
-      rotationZ.value = accumulatedQuaternion.current.z;
-
-      if (ballMeshRef.current) {
-        const mesh = ballMeshRef.current;
-        mesh.quaternion.copy(accumulatedQuaternion.current);
-        mesh.position.set(position.current.x, position.current.y, position.current.z);
-
         const ballPositionVector = new THREE.Vector3(
           position.current.x,
           position.current.y,
