@@ -17,8 +17,9 @@ import decreaseImage from "../../assets/images/decrease.png";
 
 const GAME_STATE_KEY = "gameState";
 
-export default function Stage2Screen() {
+export default function Stage1Screen() {
   const [sensitiveCount, setSensitiveCount] = useState(5);
+  const [isSensitiveButtonVisible, setIsSensitiveButtonVisible] = useState(true);
   const [isPauseButtonVisible, setIsPauseButtonVisible] = useState(true);
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -130,6 +131,7 @@ export default function Stage2Screen() {
   function onGameStart() {
     hasGameStarted.current = true;
     startTimer();
+    setIsSensitiveButtonVisible(false);
   }
 
   function onGameOver(message) {
@@ -148,6 +150,7 @@ export default function Stage2Screen() {
           onGameOver={onGameOver}
           isPaused={isPaused}
           reloadKey={appState.current}
+          sensitiveCount={sensitiveCount}
         />
         <View style={styles.uiContainer}>
           <TouchableOpacity onPress={handleMainButtonTouch}>
@@ -167,15 +170,17 @@ export default function Stage2Screen() {
             </TouchableOpacity>
           )}
         </View>
-        <View style={styles.countContainer}>
-          <TouchableOpacity onPress={handleDecreaseCount}>
-            <Image style={styles.Images} source={decreaseImage} />
-          </TouchableOpacity>
-          <Text style={styles.countText}>{sensitiveCount}</Text>
-          <TouchableOpacity onPress={handleIncreaseCount}>
-            <Image style={styles.Images} source={increaseImage} />
-          </TouchableOpacity>
-        </View>
+        {isSensitiveButtonVisible ? (
+          <View style={styles.countContainer}>
+            <TouchableOpacity onPress={handleDecreaseCount}>
+              <Image style={styles.Images} source={decreaseImage} />
+            </TouchableOpacity>
+            <Text style={styles.countText}>{sensitiveCount}</Text>
+            <TouchableOpacity onPress={handleIncreaseCount}>
+              <Image style={styles.Images} source={increaseImage} />
+            </TouchableOpacity>
+          </View>
+        ) : null}
       </View>
       <GameResultModal
         visible={isGameResultModalVisible}

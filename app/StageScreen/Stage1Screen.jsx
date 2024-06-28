@@ -27,7 +27,7 @@ export default function Stage1Screen() {
   const [isGameResultModalVisible, setIsGameResultModalVisible] = useState(false);
   const [gameResultMessage, setGameResultMessage] = useState("");
 
-  const initialTime = 500;
+  const initialTime = 60;
   const { timeLeft, startTimer, stopTimer, resetTimer, setTimeLeft } = useTimer(initialTime);
 
   const router = useRouter();
