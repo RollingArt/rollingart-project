@@ -135,6 +135,7 @@ const styles = StyleSheet.create({
   disableCardButton: {
     width: vw(50),
     height: vh(18),
+    marginTop: vh(6),
     alignItems: "center",
     justifyContent: "center",
     margin: 12,
