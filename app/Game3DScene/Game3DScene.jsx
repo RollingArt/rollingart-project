@@ -8,7 +8,6 @@ import { Box } from "@react-three/drei";
 
 import Ball from "../../src/components/Ball/Ball";
 import CameraController from "../../src/components/CameraController/CameraController";
-import TransparentObject from "../../src/components/TransparentObject/TransparentObject";
 import ColliderBox from "../../src/components/ColliderBox/ColliderBox";
 
 import ModelLoader from "../../src/hooks/ModelLoader";
@@ -71,6 +70,7 @@ export default function Game3DScreen({
   onGameOver,
   isPaused,
   reloadKey,
+  sensitiveCount,
 }) {
   // eslint-disable-next-line no-unused-vars
   const [ballPath, setBallPath] = useState([]);
@@ -118,10 +118,10 @@ export default function Game3DScreen({
     loadPattern();
 
     let accelLastUpdate = Date.now();
-    Accelerometer.setUpdateInterval(100);
+    Accelerometer.setUpdateInterval(300);
     const accelSubscription = Accelerometer.addListener((result) => {
       const now = Date.now();
-      if (now - accelLastUpdate >= 100) {
+      if (now - accelLastUpdate >= 300) {
         const normalizedData = normalizeSensorData(result, "accelerometer");
         if (
           initialTilt.current.x === 0 &&
@@ -140,8 +140,11 @@ export default function Game3DScreen({
     };
   }, [reloadKey]);
 
-  const distance = (pos1, pos2) =>
-    Math.sqrt((pos1.x - pos2.x) ** 2 + (pos1.y - pos2.y) ** 2 + (pos1.z - pos2.z) ** 2);
+  const distance = useCallback(
+    (pos1, pos2) =>
+      Math.sqrt((pos1.x - pos2.x) ** 2 + (pos1.y - pos2.y) ** 2 + (pos1.z - pos2.z) ** 2),
+    [],
+  );
 
   const handlePathUpdate = (newPosition) => {
     setBallPath((prevPath) => {
@@ -180,9 +183,9 @@ export default function Game3DScreen({
           onGameStart={onGameStart}
           onGameOver={onGameOver}
           isPaused={isPaused}
+          sensitiveCount={sensitiveCount}
           castShadow
         />
-        <TransparentObject ballMeshRef={ballMeshRef} velocity={velocity} />
         <StageOneLand setLandRef={setLandRef} />
         <EventZone
           zoneRef={startZoneRef}
