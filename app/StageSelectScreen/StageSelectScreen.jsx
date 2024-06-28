@@ -88,12 +88,12 @@ export default function StageSelectScreen() {
           onStageCardPress={handleStageCardButtonTouch}
         />
         <StageCardButton
-          cardDisabled={false}
-          cardButtonStyle={styles.disableCardButton}
+          cardDisabled={!(starCounts[1] >= 1)}
+          cardButtonStyle={starCounts[1] >= 1 ? styles.enableCardButton : styles.disableCardButton}
           stageLevel="Stage 2"
           id={2}
           starCount={starCounts[2] || 0}
-          onStageCardPress={handleStageCardButtonTouch}
+          onStageCardPress={starCounts[1] >= 1 ? handleStageCardButtonTouch : null}
         />
       </View>
       <CustomButton
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 20,
+    marginBottom: 5,
   },
   starImage: {
     height: vh(5),
