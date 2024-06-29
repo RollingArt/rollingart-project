@@ -5,6 +5,7 @@ import * as THREE from "three";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Accelerometer } from "expo-sensors";
 import { Box } from "@react-three/drei";
+import { Audio } from "expo-av";
 
 import Ball from "../../src/components/Ball/Ball";
 import CameraController from "../../src/components/CameraController/CameraController";
@@ -79,6 +80,8 @@ export default function Game3DScreen({
   const startZoneRef = useRef();
   const endZoneRef = useRef();
   const colliderRefs = useRef([]);
+  const gameBgm = useRef(new Audio.Sound());
+  const ballSound = useRef(new Audio.Sound());
 
   const [accelData, setAccelData] = useState({ x: 0, y: 0, z: 0 });
   const initialTilt = useRef({ x: 0, y: 0, z: 0 });
@@ -93,6 +96,103 @@ export default function Game3DScreen({
   const setColliderRef = (index) => (ref) => {
     colliderRefs.current[index] = ref;
   };
+
+  const [gameStarted, setGameStarted] = useState(false);
+  const [gameOver, setGameOver] = useState(false);
+
+  useEffect(() => {
+    loadSounds();
+
+    return () => {
+      unloadSounds();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (gameStarted) {
+      playGameBgmSound();
+      playBallRollSound();
+    }
+  }, [gameStarted]);
+
+  useEffect(() => {
+    if (gameOver) {
+      stopGameBgmSound();
+      stopBallRollSound();
+    }
+  }, [gameOver]);
+
+  useEffect(() => {
+    if (!isPaused) {
+      playBallRollSound();
+    } else {
+      stopBallRollSound();
+    }
+  }, [isPaused]);
+
+  function handleGameStart() {
+    if (!gameStarted) {
+      setGameStarted(true);
+      setGameOver(false);
+      onGameStart();
+    }
+  }
+
+  function handleGameOver(message) {
+    if (!gameOver) {
+      setGameOver(true);
+      setGameStarted(false);
+      onGameOver(message);
+      stopGameBgmSound();
+      stopBallRollSound();
+      unloadSounds();
+    }
+  }
+
+  async function loadSounds() {
+    await gameBgm.current.loadAsync(require("../../assets/sounds/gameBgm.mp3"));
+    await ballSound.current.loadAsync(require("../../assets/sounds/ballSound.wav"));
+    ballSound.current.setIsLoopingAsync(true);
+  }
+
+  async function unloadSounds() {
+    const bgmStatus = await gameBgm.current.getStatusAsync();
+    if (bgmStatus.isLoaded) {
+      await gameBgm.current.unloadAsync();
+    }
+    const ballStatus = await ballSound.current.getStatusAsync();
+    if (ballStatus.isLoaded) {
+      await ballSound.current.unloadAsync();
+    }
+  }
+
+  async function playGameBgmSound() {
+    const status = await gameBgm.current.getStatusAsync();
+    if (status.isLoaded) {
+      await gameBgm.current.playAsync();
+    }
+  }
+
+  async function playBallRollSound() {
+    const status = await ballSound.current.getStatusAsync();
+    if (status.isLoaded) {
+      await ballSound.current.playAsync();
+    }
+  }
+
+  async function stopBallRollSound() {
+    const status = await ballSound.current.getStatusAsync();
+    if (status.isLoaded) {
+      await ballSound.current.stopAsync();
+    }
+  }
+
+  async function stopGameBgmSound() {
+    const status = await gameBgm.current.getStatusAsync();
+    if (status.isLoaded) {
+      await gameBgm.current.stopAsync();
+    }
+  }
 
   function normalizeSensorData(data) {
     if (Platform.OS === "android") {
@@ -161,8 +261,8 @@ export default function Game3DScreen({
   }, []);
 
   return (
-    <>
-      <Canvas style={styles.container} shadows>
+    <View style={styles.container}>
+      <Canvas shadows>
         <ambientLight color={0xadd8e6} intensity={0.3} />
         <ambientLight color={0xffffff} intensity={0.6} />
         <directionalLight color={0xffffff} intensity={1} position={[5, 5, 5]} castShadow />
@@ -180,8 +280,8 @@ export default function Game3DScreen({
           startZoneRef={startZoneRef}
           endZoneRef={endZoneRef}
           colliderRefs={colliderRefs}
-          onGameStart={onGameStart}
-          onGameOver={onGameOver}
+          onGameStart={handleGameStart}
+          onGameOver={handleGameOver}
           isPaused={isPaused}
           sensitiveCount={sensitiveCount}
           castShadow
@@ -216,7 +316,7 @@ export default function Game3DScreen({
         })}
       </Canvas>
       {isOverlayVisible && <View style={styles.overlayContainer} />}
-    </>
+    </View>
   );
 }
 
