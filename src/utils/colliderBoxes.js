@@ -1,22 +1,32 @@
 const colliderBoxes = [
-  { id: "collider1", size: [77, 20, 10], position: [-130, -27, -36] },
-  { id: "collider2", size: [130, 20, 3], position: [-130, -27, 20] },
+  {
+    id: "collider1",
+    size: [70, 50, 5],
+    position: [-37, 20, 135],
+    rotation: [0, Math.PI / 2.1, 0],
+  },
+  {
+    id: "collider2",
+    size: [78, 50, 5],
+    position: [-5, 20, 173],
+    rotation: [0, Math.PI / -10, 0],
+  },
   {
     id: "collider3",
-    size: [5, 20, 65],
-    position: [-174, -27, -10],
-    rotation: [0, Math.PI / 1.06, 0],
+    size: [127, 50, 5],
+    position: [20, 20, 120],
+    rotation: [0, Math.PI / 2, 0],
   },
   {
     id: "colider4",
-    size: [3, 20, 56],
-    position: [-160, -27, 49],
-    rotation: [0, Math.PI / -1.28, 0],
+    size: [80, 50, 5],
+    position: [50, 20, 155],
+    rotation: [0, Math.PI / 4, 0],
   },
   {
     id: "colider5",
-    size: [3, 20, 49],
-    position: [-117, -27, 70],
+    size: [50, 50, 5],
+    position: [70, 20, 120],
     rotation: [0, Math.PI / -2, 0],
   },
 ];

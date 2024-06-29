@@ -39,7 +39,7 @@ export default function Game3DScreen({
 
   const [accelData, setAccelData] = useState({ x: 0, y: 0, z: 0 });
   const initialTilt = useRef({ x: 0, y: 0, z: 0 });
-  const position = useRef({ x: -120, y: 0, z: 0 });
+  const position = useRef({ x: 0, y: 0, z: 140 });
   const velocity = useRef({ x: 0, y: 0, z: 0 });
   const friction = 1.2;
 

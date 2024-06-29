@@ -22,8 +22,8 @@ export function StageOneLand({
 
   useEffect(() => {
     async function loadModel() {
-      const modelUri = await getAssetUri(require("../../../assets/models/stageOne.glb"));
-      const textureUri = await getAssetUri(require("../../../assets/images/stageOneTexture.jpg"));
+      const modelUri = await getAssetUri(require("../../../assets/models/stage1.glb"));
+      const textureUri = await getAssetUri(require("../../../assets/images/stage1Texture.jpg"));
 
       if (modelUri && textureUri) {
         setLandModelUri(modelUri);
@@ -44,7 +44,7 @@ export function StageOneLand({
   return (
     <>
       <ModelLoader modelUri={landModelUri} textureUri={landTextureUri} onLoad={setModel} />
-      {model && <primitive object={model} position={[0, -30, 0]} receiveShadow />}
+      {model && <primitive object={model} position={[0, 0, 0]} receiveShadow />}
       {model && <ExtractPathVertices model={model} />}
       {colliderBoxes.map((box, index) => {
         return (
@@ -60,22 +60,24 @@ export function StageOneLand({
       <EventZone
         zoneRef={startZoneRef}
         onGameStart={onGameStart}
-        position={[-86, -25, -7]}
-        rotation={[0, Math.PI / 34, 0]}
+        position={[-9, 0, 87]}
+        rotation={[0, Math.PI / 1.9, 0]}
         boxColor="red"
-        size={[7, 32, 53]}
+        size={[8, 35, 55]}
       />
       <EventZone
         zoneRef={endZoneRef}
         onGameOver={onGameOver}
-        position={[-93, -25, 50]}
-        rotation={[0, Math.PI / 28, 0]}
+        position={[48, 0, 105]}
+        rotation={[0, Math.PI / 1.87, 0]}
         boxColor="blue"
         size={[7, 32, 53]}
       />
     </>
   );
 }
+
+export function Stage2Land() {}
 
 export function TutorialStageLand({ setLandRef }) {
   const [landModelUri, setLandModelUri] = useState(null);
