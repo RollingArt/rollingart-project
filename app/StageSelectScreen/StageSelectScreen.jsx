@@ -82,6 +82,14 @@ export default function StageSelectScreen() {
         <StageCardButton
           cardDisabled={false}
           cardButtonStyle={styles.enableCardButton}
+          stageLevel="Tutorial"
+          id={0}
+          starCount={starCounts[1] || 0}
+          onStageCardPress={handleStageCardButtonTouch}
+        />
+        <StageCardButton
+          cardDisabled={false}
+          cardButtonStyle={styles.enableCardButton}
           stageLevel="Stage 1"
           id={1}
           starCount={starCounts[1] || 0}
@@ -119,16 +127,16 @@ const styles = StyleSheet.create({
   },
   cardWrapper: {
     justifyContent: "space-between",
-    height: vh(34),
+    height: vh(42),
     marginVertical: 36,
   },
   enableCardButton: {
     width: vw(50),
     height: vh(18),
-    marginTop: vh(6),
+    marginTop: vh(3),
     alignItems: "center",
     justifyContent: "center",
-    margin: 12,
+    margin: 2,
     borderRadius: 10,
     backgroundColor: "#DAF7D9",
   },

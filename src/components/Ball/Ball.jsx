@@ -23,6 +23,7 @@ export default function Ball({
   onGameStart,
   isPaused,
   sensitiveCount,
+  currentStage,
 }) {
   const [landModelUri, setLandModelUri] = useState(null);
   const [landTextureUri, setLandTextureUri] = useState(null);
@@ -58,12 +59,26 @@ export default function Ball({
 
   useEffect(() => {
     async function loadModel() {
-      const modelUri = await getAssetUri(require("../../../assets/models/stageOne.glb"));
-      const textureUri = await getAssetUri(require("../../../assets/images/stageOneTexture.jpg"));
+      let modelUri = null;
+      let textureUri = null;
 
-      if (modelUri && textureUri) {
-        setLandModelUri(modelUri);
-        setLandTextureUri(textureUri);
+      switch (currentStage) {
+        case 0:
+          modelUri = await getAssetUri(require("../../../assets/models/tutorialStage.glb"));
+          textureUri = await getAssetUri(
+            require("../../../assets/images/tutorialStageTexture.jpg"),
+          );
+          setLandModelUri(modelUri);
+          setLandTextureUri(textureUri);
+          break;
+        case 1:
+          modelUri = await getAssetUri(require("../../../assets/models/stageOne.glb"));
+          textureUri = await getAssetUri(require("../../../assets/images/stageOneTexture.jpg"));
+          setLandModelUri(modelUri);
+          setLandTextureUri(textureUri);
+          break;
+        default:
+          break;
       }
     }
     loadModel();
@@ -230,14 +245,16 @@ export default function Ball({
 
         ballPosition.current.copy(ballPositionVector);
 
-        const startBox = new THREE.Box3().setFromObject(startZoneRef.current);
-        const endBox = new THREE.Box3().setFromObject(endZoneRef.current);
+        if (currentStage) {
+          const startBox = new THREE.Box3().setFromObject(startZoneRef.current);
+          const endBox = new THREE.Box3().setFromObject(endZoneRef.current);
 
-        if (startBox.containsPoint(ballPositionVector)) {
-          runOnJS(onGameStart)();
-        }
-        if (endBox.containsPoint(ballPositionVector)) {
-          runOnJS(onGameOver)("finish");
+          if (startBox.containsPoint(ballPositionVector)) {
+            runOnJS(onGameStart)();
+          }
+          if (endBox.containsPoint(ballPositionVector)) {
+            runOnJS(onGameOver)("finish");
+          }
         }
       }
 
@@ -266,6 +283,7 @@ export default function Ball({
           position.current.y,
           position.current.z,
         );
+
         landRef.current.traverse((child) => {
           if (
             child.isMesh &&
@@ -275,7 +293,9 @@ export default function Ball({
           ) {
             if (child.material.uniforms.ballPosition.value instanceof THREE.Vector3) {
               child.material.uniforms.ballPosition.value.copy(ballPositionVector);
-              child.material.uniforms.dynamicTexture.value.needsUpdate = true;
+              if (child.material.uniforms.dynamicTexture.value) {
+                child.material.uniforms.dynamicTexture.value.needsUpdate = true;
+              }
             }
           }
         });
