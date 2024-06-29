@@ -110,7 +110,7 @@ export default function Game3DScreen({
 
   useEffect(() => {
     if (gameStarted) {
-      playGameStartSound();
+      playGameBgmSound();
       playBallRollSound();
     }
   }, [gameStarted]);
@@ -166,7 +166,7 @@ export default function Game3DScreen({
     }
   }
 
-  async function playGameStartSound() {
+  async function playGameBgmSound() {
     const status = await gameBgm.current.getStatusAsync();
     if (status.isLoaded) {
       await gameBgm.current.playAsync();
