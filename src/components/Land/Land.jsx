@@ -8,7 +8,7 @@ import EventZone from "../EventZone/EventZone";
 import ExtractPathVertices from "../../hooks/ExtractPathVertices";
 import colliderBoxes from "../../utils/colliderBoxes";
 
-function StageOneLand({
+export function StageOneLand({
   setLandRef,
   setColliderRef,
   startZoneRef,
@@ -77,7 +77,7 @@ function StageOneLand({
   );
 }
 
-function TutorialStageLand({ setLandRef }) {
+export function TutorialStageLand({ setLandRef }) {
   const [landModelUri, setLandModelUri] = useState(null);
   const [landTextureUri, setLandTextureUri] = useState(null);
   const [model, setModel] = useState(null);
@@ -113,5 +113,3 @@ function TutorialStageLand({ setLandRef }) {
     </>
   );
 }
-
-export { StageOneLand, TutorialStageLand };
