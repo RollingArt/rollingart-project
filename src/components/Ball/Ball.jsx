@@ -55,7 +55,7 @@ export default function Ball({
   const rotationZ = useSharedValue(0);
 
   const deadZoneHeight = -80;
-  const collisionCheckInterval = 10;
+  const collisionCheckInterval = 1;
 
   useEffect(() => {
     async function loadModel() {
