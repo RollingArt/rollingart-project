@@ -72,7 +72,7 @@ export default function Ball({
           setLandTextureUri(textureUri);
           break;
         case 1:
-          modelUri = await getAssetUri(require("../../../assets/models/stageOne.glb"));
+          modelUri = await getAssetUri(require("../../../assets/models/stage1.glb"));
           textureUri = await getAssetUri(require("../../../assets/images/stageOneTexture.jpg"));
           setLandModelUri(modelUri);
           setLandTextureUri(textureUri);
@@ -187,7 +187,7 @@ export default function Ball({
       );
       const intersects = raycaster.current.intersectObject(landRef.current, true);
 
-      if (intersects.length > 0) {
+      if (intersects.length > 0 && intersects[0]?.face) {
         landHeight = intersects[0].point.y;
 
         if (position.current.y < landHeight + 1) {
