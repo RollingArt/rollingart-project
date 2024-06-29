@@ -8,6 +8,7 @@ import Game3DScene from "../Game3DScene/Game3DScene";
 import useTimer from "../../src/hooks/useTimer";
 import ConfirmationModal from "../../src/components/ConfirmationModal/ConfirmationModal";
 import GameResultModal from "../../src/components/GameResultModal/GameResultModal";
+import ChallengeModal from "../../src/components/ChallengeModal/ChallengeModal";
 
 import MainButtonImage from "../../assets/images/home.png";
 import pauseButtonImage from "../../assets/images/pause.png";
@@ -26,6 +27,7 @@ export default function Stage1Screen() {
   const [isMainModalVisible, setIsMainModalVisible] = useState(false);
   const [isGameResultModalVisible, setIsGameResultModalVisible] = useState(false);
   const [gameResultMessage, setGameResultMessage] = useState("");
+  const [gameStarted, setGameStarted] = useState(false);
 
   const initialTime = 60;
   const { timeLeft, startTimer, stopTimer, resetTimer, setTimeLeft } = useTimer(initialTime);
@@ -132,6 +134,7 @@ export default function Stage1Screen() {
     hasGameStarted.current = true;
     startTimer();
     setIsSensitiveButtonVisible(false);
+    setGameStarted(true);
   }
 
   function onGameOver(message) {
@@ -182,6 +185,7 @@ export default function Stage1Screen() {
           </View>
         ) : null}
       </View>
+      <ChallengeModal currentStage={currentStage} gameStarted={gameStarted} />
       <GameResultModal
         visible={isGameResultModalVisible}
         currentStage={currentStage}
