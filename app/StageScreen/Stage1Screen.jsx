@@ -54,10 +54,10 @@ export default function Stage1Screen() {
   }, [timeLeft, isPaused, sensitiveCount, isPauseButtonVisible]);
 
   useEffect(() => {
-    gameDescriptionModal();
+    showGameDescriptionModal();
   }, []);
 
-  async function gameDescriptionModal() {
+  async function showGameDescriptionModal() {
     const starData = await AsyncStorage.getItem("starData");
     if (starData) {
       setIsGameDescriptionModalVisible(JSON.parse(starData));

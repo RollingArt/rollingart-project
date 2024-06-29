@@ -19,13 +19,13 @@ export default function GameDescriptionModal({ setIsPaused, setIsChallengeModalV
     setIsPaused(visible);
   }, []);
 
-  function handleNextPattern() {
+  function handleNextImageButtonTouch() {
     if (descriptionImages < images.length - 1) {
       setDescriptionImages((prevIndex) => prevIndex + 1);
     }
   }
 
-  function handlePrevPattern() {
+  function handlePrevImageButtonTouch() {
     if (descriptionImages > 0) {
       setDescriptionImages((prevIndex) => prevIndex - 1);
     }
@@ -88,11 +88,11 @@ export default function GameDescriptionModal({ setIsPaused, setIsChallengeModalV
         <View style={styles.modalView}>
           <Text style={styles.titleText}>게임 시작</Text>
           <View style={styles.rowWrapper}>
-            <TouchableOpacity onPress={descriptionImages > 0 ? handlePrevPattern : null}>
+            <TouchableOpacity onPress={descriptionImages > 0 ? handlePrevImageButtonTouch : null}>
               <Image style={styles.arrowImage} source={arrowButtonImage} />
             </TouchableOpacity>
             <Image source={images[descriptionImages]} style={styles.descriptionImage} />
-            <TouchableOpacity onPress={descriptionImages < 3 ? handleNextPattern : null}>
+            <TouchableOpacity onPress={descriptionImages < 3 ? handleNextImageButtonTouch : null}>
               <Image
                 style={[styles.arrowImage, { transform: [{ scaleX: -1 }] }]}
                 source={arrowButtonImage}
