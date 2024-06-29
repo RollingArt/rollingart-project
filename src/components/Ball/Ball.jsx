@@ -77,6 +77,12 @@ export default function Ball({
           setLandModelUri(modelUri);
           setLandTextureUri(textureUri);
           break;
+        case 2:
+          modelUri = await getAssetUri(require("../../../assets/models/stage2.glb"));
+          textureUri = await getAssetUri(require("../../../assets/images/stage2Texture.jpg"));
+          setLandModelUri(modelUri);
+          setLandTextureUri(textureUri);
+          break;
         default:
           break;
       }
