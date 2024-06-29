@@ -49,7 +49,7 @@ export default function ModelLoader({
         const uniforms = {
           baseTexture: { value: texture },
           dynamicTexture: { value: dynamicTexture },
-          ballPosition: { value: ballPosition || { x: 0, y: 0, z: 0 } },
+          ballPosition: { value: ballPosition || new THREE.Vector3(0, 0, 0) },
           brushRadius: { value: brushRadius },
         };
 
@@ -67,7 +67,7 @@ export default function ModelLoader({
 
         scene.traverse((child) => {
           if (child.isMesh) {
-            if (child.name === "stageOneLand") {
+            if (child.name === "stageOneLand" || child.name === "land") {
               child.material = landMaterial;
               if (!child.geometry.boundingBox) {
                 child.geometry.computeBoundingBox();

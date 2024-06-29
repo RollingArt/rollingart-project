@@ -19,7 +19,7 @@ import decreaseImage from "../../assets/images/decrease.png";
 
 const GAME_STATE_KEY = "gameState";
 
-export default function Stage1Screen() {
+export default function Stage0Screen() {
   const [sensitiveCount, setSensitiveCount] = useState(5);
   const [isSensitiveButtonVisible, setIsSensitiveButtonVisible] = useState(true);
   const [isPauseButtonVisible, setIsPauseButtonVisible] = useState(true);
@@ -39,7 +39,7 @@ export default function Stage1Screen() {
   const appState = useRef(AppState.currentState);
   const hasGameStarted = useRef(true);
 
-  const currentStage = 1;
+  const currentStage = 0;
 
   useEffect(() => {
     const subscription = AppState.addEventListener("change", handleAppStateChange);
@@ -176,7 +176,7 @@ export default function Stage1Screen() {
             <Image style={styles.Images} source={MainButtonImage} />
           </TouchableOpacity>
           <View style={styles.textContainer}>
-            <Text style={styles.stageText}>stage 1</Text>
+            <Text style={styles.stageText}>Tutorial</Text>
             <Text style={styles.timeText}>{timeLeft}</Text>
           </View>
           {isPauseButtonVisible ? (

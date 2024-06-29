@@ -4,65 +4,16 @@ import { Canvas, extend } from "@react-three/fiber/native";
 import * as THREE from "three";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Accelerometer } from "expo-sensors";
-import { Box } from "@react-three/drei";
 
+import { StageOneLand, TutorialStageLand } from "../../src/components/Land/Land";
 import Ball from "../../src/components/Ball/Ball";
 import CameraController from "../../src/components/CameraController/CameraController";
-import ColliderBox from "../../src/components/ColliderBox/ColliderBox";
-
-import ModelLoader from "../../src/hooks/ModelLoader";
-import ExtractPathVertices from "../../src/hooks/ExtractPathVertices";
-import getAssetUri from "../../src/utils/getAssetUri";
-import colliderBoxes from "../../src/utils/colliderBoxes";
 
 import patternTexture1 from "../../assets/images/patternTexture1.png";
 import patternTexture2 from "../../assets/images/patternTexture2.png";
 import patternTexture3 from "../../assets/images/patternTexture3.png";
 
 extend(THREE);
-
-function EventZone({ zoneRef, position, boxColor, size, rotation }) {
-  return (
-    <Box ref={zoneRef} args={size} position={position} rotation={rotation}>
-      <meshStandardMaterial args={[{ color: boxColor, transparent: true, opacity: 0.3 }]} />
-    </Box>
-  );
-}
-
-function StageOneLand({ setLandRef }) {
-  const [landModelUri, setLandModelUri] = useState(null);
-  const [landTextureUri, setLandTextureUri] = useState(null);
-  const [model, setModel] = useState(null);
-
-  useEffect(() => {
-    async function loadModel() {
-      const modelUri = await getAssetUri(require("../../assets/models/stageOne.glb"));
-      const textureUri = await getAssetUri(require("../../assets/images/stageOneTexture.jpg"));
-
-      if (modelUri && textureUri) {
-        setLandModelUri(modelUri);
-        setLandTextureUri(textureUri);
-      }
-    }
-    loadModel();
-  }, []);
-
-  useEffect(() => {
-    if (model) {
-      setLandRef(model);
-    }
-  }, [model, setLandRef]);
-
-  if (!landModelUri || !landTextureUri) return null;
-
-  return (
-    <>
-      <ModelLoader modelUri={landModelUri} textureUri={landTextureUri} onLoad={setModel} />
-      {model && <primitive object={model} position={[0, -30, 0]} receiveShadow />}
-      {model && <ExtractPathVertices model={model} />}
-    </>
-  );
-}
 
 export default function Game3DScreen({
   isOverlayVisible,
@@ -71,9 +22,12 @@ export default function Game3DScreen({
   isPaused,
   reloadKey,
   sensitiveCount,
+  currentStage,
 }) {
   // eslint-disable-next-line no-unused-vars
   const [ballPath, setBallPath] = useState([]);
+  const [landLoaded, setLandLoaded] = useState(false);
+
   const ballMeshRef = useRef();
   const landRef = useRef();
   const startZoneRef = useRef();
@@ -82,7 +36,7 @@ export default function Game3DScreen({
 
   const [accelData, setAccelData] = useState({ x: 0, y: 0, z: 0 });
   const initialTilt = useRef({ x: 0, y: 0, z: 0 });
-  const position = useRef({ x: -120, y: 1, z: 0 });
+  const position = useRef({ x: -120, y: 0, z: 0 });
   const velocity = useRef({ x: 0, y: 0, z: 0 });
   const friction = 1.2;
 
@@ -158,62 +112,48 @@ export default function Game3DScreen({
 
   const setLandRef = useCallback((model) => {
     landRef.current = model;
+    setLandLoaded(true);
   }, []);
 
   return (
     <>
       <Canvas style={styles.container} shadows>
-        <ambientLight color={0xadd8e6} intensity={0.3} />
         <ambientLight color={0xffffff} intensity={0.6} />
         <directionalLight color={0xffffff} intensity={1} position={[5, 5, 5]} castShadow />
         <CameraController followTarget={ballMeshRef} />
-        <Ball
-          ballMeshRef={ballMeshRef}
-          currentBallPatternTexture={selectedPattern}
-          initialPosition={position.current}
-          initialVelocity={velocity.current}
-          accelData={accelData}
-          friction={friction}
-          initialTilt={initialTilt}
-          onPathUpdate={handlePathUpdate}
-          landRef={landRef}
-          startZoneRef={startZoneRef}
-          endZoneRef={endZoneRef}
-          colliderRefs={colliderRefs}
-          onGameStart={onGameStart}
-          onGameOver={onGameOver}
-          isPaused={isPaused}
-          sensitiveCount={sensitiveCount}
-          castShadow
-        />
-        <StageOneLand setLandRef={setLandRef} />
-        <EventZone
-          zoneRef={startZoneRef}
-          onGameStart={onGameStart}
-          position={[-86, -25, -7]}
-          rotation={[0, Math.PI / 34, 0]}
-          boxColor="red"
-          size={[7, 32, 53]}
-        />
-        <EventZone
-          zoneRef={endZoneRef}
-          onGameOver={onGameOver}
-          position={[-93, -25, 50]}
-          rotation={[0, Math.PI / 28, 0]}
-          boxColor="blue"
-          size={[7, 32, 53]}
-        />
-        {colliderBoxes.map((box, index) => {
-          return (
-            <ColliderBox
-              key={box.id}
-              size={box.size}
-              position={box.position}
-              rotation={box.rotation}
-              ref={setColliderRef(index)}
-            />
-          );
-        })}
+        {currentStage === 0 && <TutorialStageLand setLandRef={setLandRef} />}
+        {currentStage === 1 && (
+          <StageOneLand
+            setLandRef={setLandRef}
+            setColliderRef={setColliderRef}
+            startZoneRef={startZoneRef}
+            endZoneRef={endZoneRef}
+            onGameStart={onGameStart}
+            onGameOver={onGameOver}
+          />
+        )}
+        {landLoaded && (
+          <Ball
+            ballMeshRef={ballMeshRef}
+            currentBallPatternTexture={selectedPattern}
+            initialPosition={position.current}
+            initialVelocity={velocity.current}
+            accelData={accelData}
+            friction={friction}
+            initialTilt={initialTilt}
+            onPathUpdate={handlePathUpdate}
+            landRef={landRef}
+            startZoneRef={startZoneRef}
+            endZoneRef={endZoneRef}
+            colliderRefs={colliderRefs}
+            onGameStart={onGameStart}
+            onGameOver={onGameOver}
+            isPaused={isPaused}
+            sensitiveCount={sensitiveCount}
+            currentStage={currentStage}
+            castShadow
+          />
+        )}
       </Canvas>
       {isOverlayVisible && <View style={styles.overlayContainer} />}
     </>
