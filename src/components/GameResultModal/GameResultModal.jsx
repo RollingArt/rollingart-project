@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 import { Modal, View, Text, Image, StyleSheet } from "react-native";
 import { vw, vh } from "react-native-expo-viewport-units";
@@ -12,6 +12,7 @@ import successImage from "../../../assets/images/success.png";
 import failedImage from "../../../assets/images/fail.png";
 
 export default function GameResultModal({ visible, currentStage, gameResultMessage, timeLeft }) {
+  const [storedStarData, setStoredStarData] = useState({});
   const router = useRouter();
   const completeAchievements = checkAchievements(timeLeft);
   const starCount = getStarCount(completeAchievements);
@@ -84,6 +85,8 @@ export default function GameResultModal({ visible, currentStage, gameResultMessa
       stars[stage] = count;
       await AsyncStorage.setItem("starData", JSON.stringify(stars));
     }
+
+    setStoredStarData(stars);
   }
 
   return (
@@ -118,7 +121,7 @@ export default function GameResultModal({ visible, currentStage, gameResultMessa
             />
           </Text>
           <View>
-            {currentStage < 2 ? (
+            {currentStage < 2 && storedStarData[1] >= 1 ? (
               <CustomButton
                 containerStyle={styles.buttonContainer}
                 buttonText="다음 스테이지"
