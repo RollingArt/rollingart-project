@@ -44,7 +44,7 @@ function StageOneLand({
   return (
     <>
       <ModelLoader modelUri={landModelUri} textureUri={landTextureUri} onLoad={setModel} />
-      {model && <primitive object={model} position={[0, 0, 0]} receiveShadow />}
+      {model && <primitive object={model} position={[0, -30, 0]} receiveShadow />}
       {model && <ExtractPathVertices model={model} />}
       {colliderBoxes.map((box, index) => {
         return (
