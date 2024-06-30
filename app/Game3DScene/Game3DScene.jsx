@@ -39,6 +39,8 @@ export default function Game3DScreen({
   const ballPositionRef = useRef(new THREE.Vector3());
   const [dynamicTexture, setDynamicTexture] = useState(null);
 
+  const [isGameStarted, setIsGameStarted] = useState(false);
+  const [isGameOver, setIsGameOver] = useState(false);
   const [landLoaded, setLandLoaded] = useState(false);
 
   const [patternIndex, setPatternIndex] = useState(0);
@@ -46,16 +48,12 @@ export default function Game3DScreen({
   const selectedPattern = patterns[patternIndex];
 
   const gameBgm = useRef(new Audio.Sound());
-  const ballSound = useRef(new Audio.Sound());
 
   const [accelData, setAccelData] = useState({ x: 0, y: 0, z: 0 });
   const initialTilt = useRef({ x: 0, y: 0, z: 0 });
   const position = useRef({ x: 0, y: 0, z: 140 });
   const velocity = useRef({ x: 0, y: 0, z: 0 });
   const friction = 1.2;
-
-  const [gameStarted, setGameStarted] = useState(false);
-  const [gameOver, setGameOver] = useState(false);
 
   useEffect(() => {
     const texture = new THREE.DataTexture(
@@ -99,8 +97,6 @@ export default function Game3DScreen({
     }
   }, []);
 
-  // function checkAchievement() {}
-
   const setColliderRef = (index) => (ref) => {
     colliderRefs.current[index] = ref;
   };
@@ -114,87 +110,61 @@ export default function Game3DScreen({
   }, []);
 
   useEffect(() => {
-    if (gameStarted) {
+    if (isGameStarted) {
       playGameBgmSound();
-      playBallRollSound();
     }
-  }, [gameStarted]);
+  }, [isGameStarted]);
 
   useEffect(() => {
-    if (gameOver) {
+    if (isGameOver) {
       stopGameBgmSound();
-      stopBallRollSound();
     }
-  }, [gameOver]);
+  }, [isGameOver]);
 
   useEffect(() => {
     if (!isPaused) {
-      playBallRollSound();
+      playGameBgmSound();
     } else {
-      stopBallRollSound();
+      stopGameBgmSound();
     }
   }, [isPaused]);
 
   function handleGameStart() {
-    if (!gameStarted) {
-      setGameStarted(true);
-      setGameOver(false);
+    if (!isGameStarted) {
+      setIsGameStarted(true);
       onGameStart();
     }
   }
 
   function handleGameOver(message) {
-    if (!gameOver) {
-      setGameOver(true);
-      setGameStarted(false);
+    if (!isGameOver) {
+      setIsGameOver(true);
+      setIsGameStarted(false);
       onGameOver(message);
-      stopGameBgmSound();
-      stopBallRollSound();
-      unloadSounds();
     }
   }
 
   async function loadSounds() {
-    await gameBgm.current.loadAsync(require("../../assets/sounds/gameBgm.mp3"));
-    await ballSound.current.loadAsync(require("../../assets/sounds/ballSound.wav"));
-    ballSound.current.setIsLoopingAsync(true);
+    const bgmStatus = await gameBgm.current.getStatusAsync();
+    if (!bgmStatus.isLoaded) {
+      await gameBgm.current.loadAsync(require("../../assets/sounds/gameBgm.mp3"));
+    }
   }
 
   async function unloadSounds() {
-    const bgmStatus = await gameBgm.current.getStatusAsync();
-    if (bgmStatus.isLoaded) {
-      await gameBgm.current.unloadAsync();
-    }
-    const ballStatus = await ballSound.current.getStatusAsync();
-    if (ballStatus.isLoaded) {
-      await ballSound.current.unloadAsync();
-    }
+    await gameBgm.current.unloadAsync();
   }
 
   async function playGameBgmSound() {
     const status = await gameBgm.current.getStatusAsync();
-    if (status.isLoaded) {
+    if (status.isLoaded && !status.isPlaying) {
       await gameBgm.current.playAsync();
-    }
-  }
-
-  async function playBallRollSound() {
-    const status = await ballSound.current.getStatusAsync();
-    if (status.isLoaded) {
-      await ballSound.current.playAsync();
-    }
-  }
-
-  async function stopBallRollSound() {
-    const status = await ballSound.current.getStatusAsync();
-    if (status.isLoaded) {
-      await ballSound.current.stopAsync();
     }
   }
 
   async function stopGameBgmSound() {
     const status = await gameBgm.current.getStatusAsync();
-    if (status.isLoaded) {
+    if (status.isLoaded && status.isPlaying) {
       await gameBgm.current.stopAsync();
     }
   }

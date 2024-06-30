@@ -9,7 +9,6 @@ import useTimer from "../../src/hooks/useTimer";
 import ConfirmationModal from "../../src/components/ConfirmationModal/ConfirmationModal";
 import GameResultModal from "../../src/components/GameResultModal/GameResultModal";
 import GameDescriptionModal from "../../src/components/GameDescriptionModal/GameDescriptionModal";
-import ChallengeModal from "../../src/components/ChallengeModal/ChallengeModal";
 
 import MainButtonImage from "../../assets/images/home.png";
 import pauseButtonImage from "../../assets/images/pause.png";
@@ -28,11 +27,8 @@ export default function Stage0Screen() {
   const [isMainModalVisible, setIsMainModalVisible] = useState(false);
   const [isGameResultModalVisible, setIsGameResultModalVisible] = useState(false);
   const [gameResultMessage, setGameResultMessage] = useState("");
-  const [isGameDescriptionModalVisible, setIsGameDescriptionModalVisible] = useState({});
-  const [isChallengeModalVisible, setIsChallengeModalVisible] = useState(false);
-  const [gameStarted, setGameStarted] = useState(false);
 
-  const initialTime = 60;
+  const initialTime = 999;
   const { timeLeft, startTimer, stopTimer, resetTimer, setTimeLeft } = useTimer(initialTime);
 
   const router = useRouter();
@@ -52,17 +48,6 @@ export default function Stage0Screen() {
       subscription.remove();
     };
   }, [timeLeft, isPaused, sensitiveCount, isPauseButtonVisible]);
-
-  useEffect(() => {
-    showGameDescriptionModal();
-  }, []);
-
-  async function showGameDescriptionModal() {
-    const starData = await AsyncStorage.getItem("starData");
-    if (starData) {
-      setIsGameDescriptionModalVisible(JSON.parse(starData));
-    }
-  }
 
   async function handleAppStateChange(nextAppState) {
     if (appState.current.match(/inactive|background/) && nextAppState === "active") {
@@ -148,8 +133,6 @@ export default function Stage0Screen() {
     hasGameStarted.current = true;
     startTimer();
     setIsSensitiveButtonVisible(false);
-    setIsChallengeModalVisible(false);
-    setGameStarted(true);
   }
 
   function onGameOver(message) {
@@ -201,19 +184,7 @@ export default function Stage0Screen() {
           </View>
         ) : null}
       </View>
-      {isGameDescriptionModalVisible[1] <= 1 ? (
-        <GameDescriptionModal
-          setIsPaused={setIsPaused}
-          setIsChallengeModalVisible={setIsChallengeModalVisible}
-        />
-      ) : null}
-      {isGameDescriptionModalVisible[1] > 1 ? (
-        <ChallengeModal currentStage={currentStage} gameStarted={gameStarted} />
-      ) : (
-        isChallengeModalVisible && (
-          <ChallengeModal currentStage={currentStage} gameStarted={gameStarted} />
-        )
-      )}
+      <GameDescriptionModal setIsPaused={setIsPaused} onGameStart={onGameStart} />
       <GameResultModal
         visible={isGameResultModalVisible}
         currentStage={currentStage}
