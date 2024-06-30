@@ -56,7 +56,7 @@ export default function GameResultModal({ visible, currentStage, gameResultMessa
 
   function checkAchievements(timeRemaining) {
     return {
-      achievement1: timeRemaining > 30,
+      achievement1: timeRemaining > 5,
       achievement2: timeRemaining > 20,
       achievement3: timeRemaining > 10,
     };

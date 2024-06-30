@@ -25,6 +25,10 @@ export default function Game3DScreen({
   reloadKey,
   sensitiveCount,
   currentStage,
+  correctPath,
+  setCorrectPath,
+  ballPath,
+  handlePathUpdate,
 }) {
   const landRef = useRef();
   const ballMeshRef = useRef();
@@ -32,8 +36,6 @@ export default function Game3DScreen({
   const endZoneRef = useRef();
   const colliderRefs = useRef([]);
 
-  const [correctPath, setCorrectPath] = useState([]);
-  const [ballPath, setBallPath] = useState([]);
   const ballPositionRef = useRef(new THREE.Vector3());
   const [dynamicTexture, setDynamicTexture] = useState(null);
 
@@ -66,10 +68,15 @@ export default function Game3DScreen({
     setDynamicTexture(texture);
   }, []);
 
-  const handleLoadModel = useCallback((scene) => {
-    landRef.current = scene;
-    setLandLoaded(true);
-  }, []);
+  const handleLoadModel = useCallback(
+    (scene) => {
+      landRef.current = scene;
+      if (correctPath.length) {
+        setLandLoaded(true);
+      }
+    },
+    [correctPath],
+  );
 
   const handleUpdateBallPosition = useCallback((newPosition) => {
     ballPositionRef.current.copy(newPosition);
@@ -91,6 +98,8 @@ export default function Game3DScreen({
       });
     }
   }, []);
+
+  // function checkAchievement() {}
 
   const setColliderRef = (index) => (ref) => {
     colliderRefs.current[index] = ref;
@@ -236,10 +245,6 @@ export default function Game3DScreen({
     };
   }, [reloadKey]);
 
-  const handlePathUpdate = (newPosition) => {
-    setBallPath((prevPath) => [...prevPath, newPosition]);
-  };
-
   return (
     <View style={currentStage === 2 ? styles.purpleContainer : styles.container}>
       <Canvas shadows>
@@ -279,7 +284,7 @@ export default function Game3DScreen({
               accelData={accelData}
               friction={friction}
               initialTilt={initialTilt}
-              onPathUpdate={handlePathUpdate}
+              handlePathUpdate={handlePathUpdate}
               landRef={landRef}
               startZoneRef={startZoneRef}
               endZoneRef={endZoneRef}
@@ -289,8 +294,8 @@ export default function Game3DScreen({
               isPaused={isPaused}
               sensitiveCount={sensitiveCount}
               currentStage={currentStage}
-              ballPath={ballPath}
               correctPath={correctPath}
+              ballPath={ballPath}
               updateBallPosition={handleUpdateBallPosition}
               dynamicTexture={dynamicTexture}
               castShadow

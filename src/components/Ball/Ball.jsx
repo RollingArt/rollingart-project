@@ -10,9 +10,7 @@ export default function Ball({
   friction,
   initialTilt,
   ballMeshRef,
-  correctPath,
-  ballPath,
-  onPathUpdate,
+  handlePathUpdate,
   landRef,
   startZoneRef,
   endZoneRef,
@@ -24,6 +22,8 @@ export default function Ball({
   currentStage,
   updateBallPosition,
   dynamicTexture,
+  ballPath,
+  correctPath,
 }) {
   const accumulatedQuaternion = useRef(new THREE.Quaternion());
   const position = useRef(
@@ -75,6 +75,7 @@ export default function Ball({
   }
 
   const updateBallPath = useCallback(() => {
+    console.log(ballPath);
     const currentX = Math.floor(position.current.x);
     const currentZ = Math.floor(position.current.z);
 
@@ -82,7 +83,7 @@ export default function Ball({
     const differenceInZ = currentZ - previousPositionRef.current.z;
     const distance = Math.sqrt(differenceInX * differenceInX + differenceInZ * differenceInZ);
 
-    if (distance < distanceThreshold || !correctPath.length) {
+    if (distance < distanceThreshold || !Array.isArray(correctPath) || !correctPath.length) {
       return;
     }
 
@@ -113,11 +114,11 @@ export default function Ball({
     );
 
     if (!isAlreadyInPath) {
-      onPathUpdate(closestPoint);
+      handlePathUpdate(closestPoint);
     }
 
     previousPositionRef.current = { x: currentX, z: currentZ };
-  }, [correctPath, ballPath, onPathUpdate, distanceThreshold]);
+  }, [correctPath, ballPath, handlePathUpdate, distanceThreshold]);
 
   useFrame((_, delta) => {
     if (isPaused) return;

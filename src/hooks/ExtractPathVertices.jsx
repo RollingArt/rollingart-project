@@ -20,10 +20,16 @@ export default function ExtractPathVertices({ model, setCorrectPath }) {
               const vertex = new THREE.Vector3();
               vertex.fromBufferAttribute(positionAttribute, i);
               geometryObject.localToWorld(vertex);
-              tempVertices.push({
-                x: Math.floor(vertex.x),
-                z: Math.floor(vertex.z),
-              });
+
+              const newVertex = { x: Math.floor(vertex.x), z: Math.floor(vertex.z) };
+              if (
+                !tempVertices.some(
+                  (existingVertex) =>
+                    existingVertex.x === newVertex.x && existingVertex.z === newVertex.z,
+                )
+              ) {
+                tempVertices.push(newVertex);
+              }
             }
           }
         });
