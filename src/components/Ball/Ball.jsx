@@ -14,6 +14,8 @@ export default function Ball({
   friction,
   initialTilt,
   ballMeshRef,
+  correctPath,
+  ballPath,
   onPathUpdate,
   landRef,
   startZoneRef,
@@ -43,9 +45,7 @@ export default function Ball({
   const raycaster = useRef(new THREE.Raycaster());
 
   const previousPositionRef = useRef({ x: 0, y: 0, z: 0 });
-  const distanceThreshold = 3;
-  const frameCount = useRef(0);
-  const updateInterval = 30;
+  const distanceThreshold = 2;
 
   const positionX = useSharedValue(initialPosition?.x);
   const positionY = useSharedValue(initialPosition?.y);
@@ -55,7 +55,6 @@ export default function Ball({
   const rotationZ = useSharedValue(0);
 
   const deadZoneHeight = -80;
-  const collisionCheckInterval = 1;
 
   useEffect(() => {
     async function loadModel() {
@@ -149,26 +148,48 @@ export default function Ball({
   }
 
   function updateBallPath() {
-    frameCount.current += 1;
+    const currentX = Math.floor(position.current.x);
+    const currentZ = Math.floor(position.current.z);
 
-    if (frameCount.current % updateInterval === 0) {
-      const deltaX = positionX.value - previousPositionRef.current.x;
-      const deltaY = positionZ.value - previousPositionRef.current.z;
-      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const differenceInX = currentX - previousPositionRef.current.x;
+    const differenceInZ = currentZ - previousPositionRef.current.z;
+    const distance = Math.sqrt(differenceInX * differenceInX + differenceInZ * differenceInZ);
 
-      if (distance >= distanceThreshold) {
-        runOnJS(onPathUpdate)({
-          x: positionX.value,
-          y: positionY.value,
-          z: positionZ.value,
-        });
-        previousPositionRef.current = {
-          x: positionX.value,
-          y: positionY.value,
-          z: positionZ.value,
-        };
-      }
+    if (distance < distanceThreshold || !correctPath.length) {
+      return;
     }
+
+    const newPathPoint = { x: currentX, z: currentZ };
+
+    let closestPoint = null;
+    let minDistance = Infinity;
+
+    correctPath.forEach((point) => {
+      const differenceInCorrectX = point.x - newPathPoint.x;
+      const differenceInCorrectZ = point.z - newPathPoint.z;
+      const correctDistance = Math.sqrt(
+        differenceInCorrectX * differenceInCorrectX + differenceInCorrectZ * differenceInCorrectZ,
+      );
+
+      if (correctDistance < minDistance) {
+        minDistance = correctDistance;
+        closestPoint = point;
+      }
+    });
+
+    if (!closestPoint || minDistance > distanceThreshold) {
+      return;
+    }
+
+    const isAlreadyInPath = ballPath.some(
+      (point) => point.x === closestPoint.x && point.z === closestPoint.z,
+    );
+
+    if (!isAlreadyInPath) {
+      runOnJS(onPathUpdate)(closestPoint);
+    }
+
+    previousPositionRef.current = { x: currentX, z: currentZ };
   }
 
   useFrame((_, delta) => {
@@ -264,16 +285,14 @@ export default function Ball({
         }
       }
 
-      if (frameCount.current % collisionCheckInterval === 0) {
-        const colliders = [...colliderRefs.current];
-        const collisionDetected = colliders.some((collider) =>
-          new THREE.Box3().setFromObject(collider).containsPoint(position.current),
-        );
+      const colliders = [...colliderRefs.current];
+      const collisionDetected = colliders.some((collider) =>
+        new THREE.Box3().setFromObject(collider).containsPoint(position.current),
+      );
 
-        if (collisionDetected) {
-          position.current.copy(previousPosition.current);
-          velocity.current.set(0, 0, 0);
-        }
+      if (collisionDetected) {
+        position.current.copy(previousPosition.current);
+        velocity.current.set(0, 0, 0);
       }
 
       positionX.value = position.current.x;

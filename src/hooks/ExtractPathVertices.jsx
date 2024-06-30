@@ -1,11 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import * as THREE from "three";
 import findGeometries from "../utils/findGeometries";
 
-export default function ExtractPathVertices({ model }) {
-  // eslint-disable-next-line no-unused-vars
-  const [vertices, setVertices] = useState([]);
-
+export default function ExtractPathVertices({ model, setCorrectPath }) {
   useEffect(() => {
     if (model) {
       const pathGroup = model.getObjectByName("correctPath");
@@ -24,16 +21,15 @@ export default function ExtractPathVertices({ model }) {
               vertex.fromBufferAttribute(positionAttribute, i);
               geometryObject.localToWorld(vertex);
               tempVertices.push({
-                x: vertex.x,
-                y: vertex.y,
-                z: vertex.z,
+                x: Math.floor(vertex.x),
+                z: Math.floor(vertex.z),
               });
             }
           }
         });
 
         if (tempVertices.length > 0) {
-          setVertices(tempVertices);
+          setCorrectPath(tempVertices);
         }
       }
     }

@@ -26,6 +26,7 @@ export default function Game3DScreen({
   currentStage,
 }) {
   // eslint-disable-next-line no-unused-vars
+  const [correctPath, setCorrectPath] = useState([]);
   const [ballPath, setBallPath] = useState([]);
   const [landLoaded, setLandLoaded] = useState(false);
 
@@ -194,20 +195,8 @@ export default function Game3DScreen({
     };
   }, [reloadKey]);
 
-  const distance = useCallback(
-    (pos1, pos2) =>
-      Math.sqrt((pos1.x - pos2.x) ** 2 + (pos1.y - pos2.y) ** 2 + (pos1.z - pos2.z) ** 2),
-    [],
-  );
-
   const handlePathUpdate = (newPosition) => {
-    setBallPath((prevPath) => {
-      const lastPosition = prevPath[prevPath.length - 1];
-      if (!lastPosition || distance(newPosition, lastPosition) > 2) {
-        return [...prevPath, newPosition];
-      }
-      return prevPath;
-    });
+    setBallPath((prevPath) => [...prevPath, newPosition]);
   };
 
   const setLandRef = useCallback((model) => {
@@ -230,6 +219,7 @@ export default function Game3DScreen({
             endZoneRef={endZoneRef}
             onGameStart={onGameStart}
             onGameOver={onGameOver}
+            setCorrectPath={setCorrectPath}
           />
         )}
         {currentStage === 2 && (
@@ -240,6 +230,7 @@ export default function Game3DScreen({
             endZoneRef={endZoneRef}
             onGameStart={onGameStart}
             onGameOver={onGameOver}
+            setCorrectPath={setCorrectPath}
           />
         )}
         {landLoaded && (
@@ -261,6 +252,8 @@ export default function Game3DScreen({
             isPaused={isPaused}
             sensitiveCount={sensitiveCount}
             currentStage={currentStage}
+            ballPath={ballPath}
+            correctPath={correctPath}
             castShadow
           />
         )}

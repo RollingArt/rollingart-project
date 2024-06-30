@@ -15,6 +15,7 @@ export function Stage1Land({
   endZoneRef,
   onGameStart,
   onGameOver,
+  setCorrectPath,
 }) {
   const [landModelUri, setLandModelUri] = useState(null);
   const [landTextureUri, setLandTextureUri] = useState(null);
@@ -45,7 +46,7 @@ export function Stage1Land({
     <>
       <ModelLoader modelUri={landModelUri} textureUri={landTextureUri} onLoad={setModel} />
       {model && <primitive object={model} position={[0, 0, 0]} receiveShadow />}
-      {model && <ExtractPathVertices model={model} />}
+      {model && <ExtractPathVertices model={model} setCorrectPath={setCorrectPath} />}
       {colliderBoxes.map((box, index) => {
         return (
           <ColliderBox
@@ -84,6 +85,7 @@ export function Stage2Land({
   endZoneRef,
   onGameStart,
   onGameOver,
+  setCorrectPath,
 }) {
   const [landModelUri, setLandModelUri] = useState(null);
   const [landTextureUri, setLandTextureUri] = useState(null);
@@ -114,7 +116,7 @@ export function Stage2Land({
     <>
       <ModelLoader modelUri={landModelUri} textureUri={landTextureUri} onLoad={setModel} />
       {model && <primitive object={model} position={[0, 0, 0]} receiveShadow />}
-      {model && <ExtractPathVertices model={model} />}
+      {model && <ExtractPathVertices model={model} setCorrectPath={setCorrectPath} />}
       {colliderBoxes.map((box, index) => {
         return (
           <ColliderBox
@@ -178,7 +180,6 @@ export function TutorialStageLand({ setLandRef }) {
     <>
       <ModelLoader modelUri={landModelUri} textureUri={landTextureUri} onLoad={setModel} />
       {model && <primitive object={model} position={[0, 0, 0]} receiveShadow />}
-      {model && <ExtractPathVertices model={model} />}
     </>
   );
 }
