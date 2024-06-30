@@ -26,7 +26,7 @@ export default function GameResultModal({
 
   useEffect(() => {
     if (visible) {
-      const newAchievements = checkAchievements(timeLeft);
+      const newAchievements = checkAchievements(timeLeft, currentStage);
       const newStarCount = getStarCount(newAchievements);
       setCompleteAchievements(newAchievements);
       setStarCount(newStarCount);
@@ -71,12 +71,27 @@ export default function GameResultModal({
     return 0;
   }
 
-  function checkAchievements(timeRemaining) {
-    return {
-      achievement1: matchedRate > 60,
-      achievement2: timeRemaining > 10,
-      achievement3: timeRemaining > 20,
-    };
+  function checkAchievements(timeRemaining, stage) {
+    switch (stage) {
+      case 1:
+        return {
+          achievement1: matchedRate > 65,
+          achievement2: timeRemaining > 5,
+          achievement3: timeRemaining > 15,
+        };
+      case 2:
+        return {
+          achievement1: matchedRate > 60,
+          achievement2: timeRemaining > 10,
+          achievement3: timeRemaining > 20,
+        };
+      default:
+        return {
+          achievement1: "도전 과제 1",
+          achievement2: "도전 과제 2",
+          achievement3: "도전 과제 3",
+        };
+    }
   }
 
   function isAchievementCompleted(achievement) {
@@ -110,21 +125,21 @@ export default function GameResultModal({
             <Image style={styles.smallStarImage} source={starCount >= 3 ? filledStar : emptyStar} />
           </View>
           <Text style={styles.challengeText}>
-            일치율 60% 이상
+            일치율 {currentStage === 1 ? "65%" : "60%"} 이상
             <Image
               style={styles.challengeImage}
               source={isAchievementCompleted(completeAchievements.achievement1)}
             />
           </Text>
           <Text style={styles.challengeText}>
-            남은 시간 10초 이상
+            남은 시간 {currentStage === 1 ? "5초" : "10초"} 이상
             <Image
               style={styles.challengeImage}
               source={isAchievementCompleted(completeAchievements.achievement2)}
             />
           </Text>
           <Text style={styles.challengeText}>
-            남은 시간 20초 이상
+            남은 시간 {currentStage === 1 ? "15초" : "20초"} 이상
             <Image
               style={styles.challengeImage}
               source={isAchievementCompleted(completeAchievements.achievement3)}
