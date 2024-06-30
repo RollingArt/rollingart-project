@@ -39,7 +39,7 @@ export default function Ball({
   const previousPositionRef = useRef({ x: 0, y: 0, z: 0 });
 
   const gravity = -9.8;
-  const distanceThreshold = 2;
+  const distanceThreshold = 3;
   const deadZoneHeight = -80;
 
   const ballTexture = useMemo(() => {
@@ -75,13 +75,14 @@ export default function Ball({
   }
 
   const updateBallPath = useCallback(() => {
-    console.log(ballPath);
     const currentX = Math.floor(position.current.x);
     const currentZ = Math.floor(position.current.z);
 
     const differenceInX = currentX - previousPositionRef.current.x;
     const differenceInZ = currentZ - previousPositionRef.current.z;
     const distance = Math.sqrt(differenceInX * differenceInX + differenceInZ * differenceInZ);
+
+    if (currentStage === 0) return;
 
     if (distance < distanceThreshold || !Array.isArray(correctPath) || !correctPath.length) {
       return;

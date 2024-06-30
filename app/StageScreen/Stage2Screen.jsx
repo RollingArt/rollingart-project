@@ -8,6 +8,7 @@ import Game3DScene from "../Game3DScene/Game3DScene";
 import useTimer from "../../src/hooks/useTimer";
 import ConfirmationModal from "../../src/components/ConfirmationModal/ConfirmationModal";
 import GameResultModal from "../../src/components/GameResultModal/GameResultModal";
+import GameDescriptionModal from "../../src/components/GameDescriptionModal/GameDescriptionModal";
 import ChallengeModal from "../../src/components/ChallengeModal/ChallengeModal";
 
 import MainButtonImage from "../../assets/images/home.png";
@@ -18,7 +19,7 @@ import decreaseImage from "../../assets/images/decrease.png";
 
 const GAME_STATE_KEY = "gameState";
 
-export default function Stage1Screen() {
+export default function Stage2Screen() {
   const [sensitiveCount, setSensitiveCount] = useState(5);
   const [isSensitiveButtonVisible, setIsSensitiveButtonVisible] = useState(true);
   const [isPauseButtonVisible, setIsPauseButtonVisible] = useState(true);
@@ -27,7 +28,12 @@ export default function Stage1Screen() {
   const [isMainModalVisible, setIsMainModalVisible] = useState(false);
   const [isGameResultModalVisible, setIsGameResultModalVisible] = useState(false);
   const [gameResultMessage, setGameResultMessage] = useState("");
+  const [isGameDescriptionModalVisible, setIsGameDescriptionModalVisible] = useState({});
+  const [isChallengeModalVisible, setIsChallengeModalVisible] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
+  const [ballPath, setBallPath] = useState([]);
+  const [correctPath, setCorrectPath] = useState([]);
+  const [matchedRate, setMatchedRate] = useState(0);
 
   const initialTime = 60;
   const { timeLeft, startTimer, stopTimer, resetTimer, setTimeLeft } = useTimer(initialTime);
@@ -49,6 +55,17 @@ export default function Stage1Screen() {
       subscription.remove();
     };
   }, [timeLeft, isPaused, sensitiveCount, isPauseButtonVisible]);
+
+  useEffect(() => {
+    showGameDescriptionModal();
+  }, []);
+
+  async function showGameDescriptionModal() {
+    const starData = await AsyncStorage.getItem("starData");
+    if (starData) {
+      setIsGameDescriptionModalVisible(JSON.parse(starData));
+    }
+  }
 
   async function handleAppStateChange(nextAppState) {
     if (appState.current.match(/inactive|background/) && nextAppState === "active") {
@@ -134,14 +151,31 @@ export default function Stage1Screen() {
     hasGameStarted.current = true;
     startTimer();
     setIsSensitiveButtonVisible(false);
+    setIsChallengeModalVisible(false);
     setGameStarted(true);
   }
 
-  function onGameOver(message) {
-    setIsGameResultModalVisible(true);
+  async function onGameOver(message) {
+    const matchRate = await calculateMatchRate();
+    setMatchedRate(matchRate);
     setIsPaused(true);
-    stopTimer();
     setGameResultMessage(message);
+    setIsGameResultModalVisible(true);
+    stopTimer();
+  }
+
+  function handlePathUpdate(newPosition) {
+    setBallPath((prevPath) => [...prevPath, newPosition]);
+  }
+
+  async function calculateMatchRate() {
+    if (correctPath.length === 0) {
+      return 0;
+    }
+    const rate = ballPath.length / correctPath.length;
+    const roundedRate = parseFloat(rate.toFixed(2)) * 100;
+
+    return roundedRate;
   }
 
   return (
@@ -155,6 +189,10 @@ export default function Stage1Screen() {
           reloadKey={appState.current}
           sensitiveCount={sensitiveCount}
           currentStage={currentStage}
+          correctPath={correctPath}
+          setCorrectPath={setCorrectPath}
+          handlePathUpdate={handlePathUpdate}
+          ballPath={ballPath}
         />
         <View style={styles.uiContainer}>
           <TouchableOpacity onPress={handleMainButtonTouch}>
@@ -186,12 +224,25 @@ export default function Stage1Screen() {
           </View>
         ) : null}
       </View>
-      <ChallengeModal currentStage={currentStage} gameStarted={gameStarted} />
+      {isGameDescriptionModalVisible[1] <= 1 ? (
+        <GameDescriptionModal
+          setIsPaused={setIsPaused}
+          setIsChallengeModalVisible={setIsChallengeModalVisible}
+        />
+      ) : null}
+      {isGameDescriptionModalVisible[1] > 1 ? (
+        <ChallengeModal currentStage={currentStage} gameStarted={gameStarted} />
+      ) : (
+        isChallengeModalVisible && (
+          <ChallengeModal currentStage={currentStage} gameStarted={gameStarted} />
+        )
+      )}
       <GameResultModal
         visible={isGameResultModalVisible}
         currentStage={currentStage}
         gameResultMessage={gameResultMessage}
         timeLeft={timeLeft}
+        matchedRate={matchedRate}
       />
       <ConfirmationModal
         visible={isMainModalVisible}

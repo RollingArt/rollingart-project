@@ -69,9 +69,7 @@ export default function Game3DScreen({
   const handleLoadModel = useCallback(
     (scene) => {
       landRef.current = scene;
-      if (correctPath.length) {
-        setLandLoaded(true);
-      }
+      setLandLoaded(true);
     },
     [correctPath],
   );

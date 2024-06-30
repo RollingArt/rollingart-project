@@ -9,7 +9,7 @@ export default function ExtractPathVertices({ model, setCorrectPath }) {
 
       if (pathGroup) {
         const geometries = findGeometries(pathGroup);
-        const tempVertices = [];
+        const tempVertices = new Set();
 
         geometries.forEach((geometryObject) => {
           const { geometry } = geometryObject;
@@ -21,25 +21,22 @@ export default function ExtractPathVertices({ model, setCorrectPath }) {
               vertex.fromBufferAttribute(positionAttribute, i);
               geometryObject.localToWorld(vertex);
 
-              const newVertex = { x: Math.floor(vertex.x), z: Math.floor(vertex.z) };
-              if (
-                !tempVertices.some(
-                  (existingVertex) =>
-                    existingVertex.x === newVertex.x && existingVertex.z === newVertex.z,
-                )
-              ) {
-                tempVertices.push(newVertex);
-              }
+              const newVertex = `${Math.floor(vertex.x)},${Math.floor(vertex.z)}`;
+              tempVertices.add(newVertex);
             }
           }
         });
 
-        if (tempVertices.length > 0) {
-          setCorrectPath(tempVertices);
+        if (tempVertices.size > 0) {
+          const uniqueVertices = Array.from(tempVertices).map((vertex) => {
+            const [x, z] = vertex.split(",").map(Number);
+            return { x, z };
+          });
+          setCorrectPath(uniqueVertices);
         }
       }
     }
-  }, [model]);
+  }, [model, setCorrectPath]);
 
   return null;
 }
