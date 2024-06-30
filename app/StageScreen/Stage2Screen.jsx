@@ -154,6 +154,7 @@ export default function Stage1Screen() {
           isPaused={isPaused}
           reloadKey={appState.current}
           sensitiveCount={sensitiveCount}
+          currentStage={currentStage}
         />
         <View style={styles.uiContainer}>
           <TouchableOpacity onPress={handleMainButtonTouch}>

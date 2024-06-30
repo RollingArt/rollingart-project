@@ -55,7 +55,7 @@ export default function Ball({
   const rotationZ = useSharedValue(0);
 
   const deadZoneHeight = -80;
-  const collisionCheckInterval = 10;
+  const collisionCheckInterval = 1;
 
   useEffect(() => {
     async function loadModel() {
@@ -72,8 +72,14 @@ export default function Ball({
           setLandTextureUri(textureUri);
           break;
         case 1:
-          modelUri = await getAssetUri(require("../../../assets/models/stageOne.glb"));
-          textureUri = await getAssetUri(require("../../../assets/images/stageOneTexture.jpg"));
+          modelUri = await getAssetUri(require("../../../assets/models/stage1.glb"));
+          textureUri = await getAssetUri(require("../../../assets/images/stage1Texture.jpg"));
+          setLandModelUri(modelUri);
+          setLandTextureUri(textureUri);
+          break;
+        case 2:
+          modelUri = await getAssetUri(require("../../../assets/models/stage2.glb"));
+          textureUri = await getAssetUri(require("../../../assets/images/stage2Texture.jpg"));
           setLandModelUri(modelUri);
           setLandTextureUri(textureUri);
           break;
@@ -187,7 +193,7 @@ export default function Ball({
       );
       const intersects = raycaster.current.intersectObject(landRef.current, true);
 
-      if (intersects.length > 0) {
+      if (intersects.length > 0 && intersects[0]?.face) {
         landHeight = intersects[0].point.y;
 
         if (position.current.y < landHeight + 1) {

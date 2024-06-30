@@ -67,7 +67,7 @@ export default function ModelLoader({
 
         scene.traverse((child) => {
           if (child.isMesh) {
-            if (child.name === "stageOneLand" || child.name === "land") {
+            if (child.name === "land") {
               child.material = landMaterial;
               if (!child.geometry.boundingBox) {
                 child.geometry.computeBoundingBox();

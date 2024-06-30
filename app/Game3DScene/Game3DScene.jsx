@@ -6,7 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Accelerometer } from "expo-sensors";
 import { Audio } from "expo-av";
 
-import { StageOneLand, TutorialStageLand } from "../../src/components/Land/Land";
+import { Stage1Land, Stage2Land, TutorialStageLand } from "../../src/components/Land/Land";
 import Ball from "../../src/components/Ball/Ball";
 import CameraController from "../../src/components/CameraController/CameraController";
 
@@ -39,7 +39,7 @@ export default function Game3DScreen({
 
   const [accelData, setAccelData] = useState({ x: 0, y: 0, z: 0 });
   const initialTilt = useRef({ x: 0, y: 0, z: 0 });
-  const position = useRef({ x: -120, y: 0, z: 0 });
+  const position = useRef({ x: 0, y: 0, z: 140 });
   const velocity = useRef({ x: 0, y: 0, z: 0 });
   const friction = 1.2;
 
@@ -216,15 +216,24 @@ export default function Game3DScreen({
   }, []);
 
   return (
-    <View style={styles.container}>
+    <View style={currentStage === 2 ? styles.purpleContainer : styles.container}>
       <Canvas shadows>
-        <ambientLight color={0xadd8e6} intensity={0.3} />
         <ambientLight color={0xffffff} intensity={0.6} />
         <directionalLight color={0xffffff} intensity={1} position={[5, 5, 5]} castShadow />
         <CameraController followTarget={ballMeshRef} />
         {currentStage === 0 && <TutorialStageLand setLandRef={setLandRef} />}
         {currentStage === 1 && (
-          <StageOneLand
+          <Stage1Land
+            setLandRef={setLandRef}
+            setColliderRef={setColliderRef}
+            startZoneRef={startZoneRef}
+            endZoneRef={endZoneRef}
+            onGameStart={onGameStart}
+            onGameOver={onGameOver}
+          />
+        )}
+        {currentStage === 2 && (
+          <Stage2Land
             setLandRef={setLandRef}
             setColliderRef={setColliderRef}
             startZoneRef={startZoneRef}
@@ -265,6 +274,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FCFEFF",
+  },
+  purpleContainer: {
+    flex: 1,
+    backgroundColor: "#EEE6FF",
   },
   overlayContainer: {
     ...StyleSheet.absoluteFillObject,
