@@ -1,7 +1,6 @@
 import { useMemo, useRef, useEffect, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { useSharedValue, runOnJS } from "react-native-reanimated";
 
 import ModelLoader from "../../hooks/ModelLoader";
 import getAssetUri from "../../utils/getAssetUri";
@@ -41,19 +40,11 @@ export default function Ball({
     new THREE.Vector3(initialPosition.x, initialPosition.y, initialPosition.z),
   );
 
-  const gravity = -9.8;
   const raycaster = useRef(new THREE.Raycaster());
-
   const previousPositionRef = useRef({ x: 0, y: 0, z: 0 });
+
+  const gravity = -9.8;
   const distanceThreshold = 2;
-
-  const positionX = useSharedValue(initialPosition?.x);
-  const positionY = useSharedValue(initialPosition?.y);
-  const positionZ = useSharedValue(initialPosition?.z);
-
-  const rotationX = useSharedValue(0);
-  const rotationZ = useSharedValue(0);
-
   const deadZoneHeight = -80;
 
   useEffect(() => {
@@ -87,7 +78,7 @@ export default function Ball({
       }
     }
     loadModel();
-  }, []);
+  }, [currentStage]);
 
   const ballTexture = useMemo(() => {
     const ballPatternTexture = new THREE.TextureLoader().load(currentBallPatternTexture);
@@ -186,7 +177,7 @@ export default function Ball({
     );
 
     if (!isAlreadyInPath) {
-      runOnJS(onPathUpdate)(closestPoint);
+      onPathUpdate(closestPoint);
     }
 
     previousPositionRef.current = { x: currentX, z: currentZ };
@@ -226,7 +217,7 @@ export default function Ball({
         landSlopeX = Math.abs(normal.x) > slopeThreshold ? normal.x : 0;
         landSlopeY = Math.abs(normal.y) > slopeThreshold ? normal.y : 0;
       } else if (position.current.y < deadZoneHeight) {
-        runOnJS(onGameOver)("fall");
+        onGameOver("fall");
       }
 
       velocity.current.x += (extraTiltX + landSlopeX) * delta * (sensitiveCount + 3);
@@ -277,10 +268,10 @@ export default function Ball({
           const endBox = new THREE.Box3().setFromObject(endZoneRef.current);
 
           if (startBox.containsPoint(ballPositionVector)) {
-            runOnJS(onGameStart)();
+            onGameStart();
           }
           if (endBox.containsPoint(ballPositionVector)) {
-            runOnJS(onGameOver)("finish");
+            onGameOver("finish");
           }
         }
       }
@@ -295,19 +286,14 @@ export default function Ball({
         velocity.current.set(0, 0, 0);
       }
 
-      positionX.value = position.current.x;
-      positionY.value = position.current.y;
-      positionZ.value = position.current.z;
-
-      rotationX.value = accumulatedQuaternion.current.x;
-      rotationZ.value = accumulatedQuaternion.current.z;
-
       if (landRef.current) {
         const ballPositionVector = new THREE.Vector3(
           position.current.x,
           position.current.y,
           position.current.z,
         );
+
+        updateBallPath();
 
         landRef.current.traverse((child) => {
           if (
@@ -325,8 +311,6 @@ export default function Ball({
           }
         });
       }
-
-      updateBallPath();
       const uv = intersects[0]?.uv;
       if (uv) {
         const uvX = Math.floor(uv.x * 1024);
