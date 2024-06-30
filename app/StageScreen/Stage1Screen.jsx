@@ -31,6 +31,8 @@ export default function Stage1Screen() {
   const [isGameDescriptionModalVisible, setIsGameDescriptionModalVisible] = useState({});
   const [isChallengeModalVisible, setIsChallengeModalVisible] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
+  const [ballPath, setBallPath] = useState([]);
+  const [correctPath, setCorrectPath] = useState([]);
 
   const initialTime = 60;
   const { timeLeft, startTimer, stopTimer, resetTimer, setTimeLeft } = useTimer(initialTime);
@@ -159,6 +161,10 @@ export default function Stage1Screen() {
     setGameResultMessage(message);
   }
 
+  function handlePathUpdate(newPosition) {
+    setBallPath((prevPath) => [...prevPath, newPosition]);
+  }
+
   return (
     <>
       <View style={styles.container}>
@@ -170,6 +176,10 @@ export default function Stage1Screen() {
           reloadKey={appState.current}
           sensitiveCount={sensitiveCount}
           currentStage={currentStage}
+          correctPath={correctPath}
+          setCorrectPath={setCorrectPath}
+          handlePathUpdate={handlePathUpdate}
+          ballPath={ballPath}
         />
         <View style={styles.uiContainer}>
           <TouchableOpacity onPress={handleMainButtonTouch}>

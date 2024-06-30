@@ -1,10 +1,6 @@
-import { useMemo, useRef, useEffect, useState } from "react";
+import { useMemo, useRef, useCallback } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { useSharedValue, runOnJS } from "react-native-reanimated";
-
-import ModelLoader from "../../hooks/ModelLoader";
-import getAssetUri from "../../utils/getAssetUri";
 
 export default function Ball({
   currentBallPatternTexture,
@@ -14,7 +10,7 @@ export default function Ball({
   friction,
   initialTilt,
   ballMeshRef,
-  onPathUpdate,
+  handlePathUpdate,
   landRef,
   startZoneRef,
   endZoneRef,
@@ -24,10 +20,11 @@ export default function Ball({
   isPaused,
   sensitiveCount,
   currentStage,
+  updateBallPosition,
+  dynamicTexture,
+  ballPath,
+  correctPath,
 }) {
-  const [landModelUri, setLandModelUri] = useState(null);
-  const [landTextureUri, setLandTextureUri] = useState(null);
-
   const accumulatedQuaternion = useRef(new THREE.Quaternion());
   const position = useRef(
     new THREE.Vector3(initialPosition.x, initialPosition.y, initialPosition.z),
@@ -38,57 +35,12 @@ export default function Ball({
   const previousPosition = useRef(
     new THREE.Vector3(initialPosition.x, initialPosition.y, initialPosition.z),
   );
+  const raycaster = useRef(new THREE.Raycaster());
+  const previousPositionRef = useRef({ x: 0, y: 0, z: 0 });
 
   const gravity = -9.8;
-  const raycaster = useRef(new THREE.Raycaster());
-
-  const previousPositionRef = useRef({ x: 0, y: 0, z: 0 });
-  const distanceThreshold = 3;
-  const frameCount = useRef(0);
-  const updateInterval = 30;
-
-  const positionX = useSharedValue(initialPosition?.x);
-  const positionY = useSharedValue(initialPosition?.y);
-  const positionZ = useSharedValue(initialPosition?.z);
-
-  const rotationX = useSharedValue(0);
-  const rotationZ = useSharedValue(0);
-
+  const distanceThreshold = 2;
   const deadZoneHeight = -80;
-  const collisionCheckInterval = 1;
-
-  useEffect(() => {
-    async function loadModel() {
-      let modelUri = null;
-      let textureUri = null;
-
-      switch (currentStage) {
-        case 0:
-          modelUri = await getAssetUri(require("../../../assets/models/tutorialStage.glb"));
-          textureUri = await getAssetUri(
-            require("../../../assets/images/tutorialStageTexture.jpg"),
-          );
-          setLandModelUri(modelUri);
-          setLandTextureUri(textureUri);
-          break;
-        case 1:
-          modelUri = await getAssetUri(require("../../../assets/models/stage1.glb"));
-          textureUri = await getAssetUri(require("../../../assets/images/stage1Texture.jpg"));
-          setLandModelUri(modelUri);
-          setLandTextureUri(textureUri);
-          break;
-        case 2:
-          modelUri = await getAssetUri(require("../../../assets/models/stage2.glb"));
-          textureUri = await getAssetUri(require("../../../assets/images/stage2Texture.jpg"));
-          setLandModelUri(modelUri);
-          setLandTextureUri(textureUri);
-          break;
-        default:
-          break;
-      }
-    }
-    loadModel();
-  }, []);
 
   const ballTexture = useMemo(() => {
     const ballPatternTexture = new THREE.TextureLoader().load(currentBallPatternTexture);
@@ -98,32 +50,6 @@ export default function Ball({
 
     return ballPatternTexture;
   }, [currentBallPatternTexture]);
-
-  function handleModelLoad(scene) {
-    landRef.current = scene;
-  }
-
-  const dynamicTexture = useMemo(() => {
-    const size = 1024;
-    const data = new Uint8Array(size * size * 4);
-    for (let i = 0; i < size * size * 4; i += 4) {
-      data[i] = 0;
-      data[i + 1] = 0;
-      data[i + 2] = 0;
-      data[i + 3] = 0;
-    }
-    const texture = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
-    texture.needsUpdate = true;
-    return texture;
-  }, []);
-
-  const ballPosition = useRef(new THREE.Vector3());
-
-  useEffect(() => {
-    if (ballMeshRef.current) {
-      ballPosition.current.copy(ballMeshRef.current.position);
-    }
-  }, [ballMeshRef]);
 
   function updateTexture(uvX, uvY) {
     const radius = 3;
@@ -148,33 +74,56 @@ export default function Ball({
     dynamicTexture.needsUpdate = true;
   }
 
-  function updateBallPath() {
-    frameCount.current += 1;
+  const updateBallPath = useCallback(() => {
+    console.log(ballPath);
+    const currentX = Math.floor(position.current.x);
+    const currentZ = Math.floor(position.current.z);
 
-    if (frameCount.current % updateInterval === 0) {
-      const deltaX = positionX.value - previousPositionRef.current.x;
-      const deltaY = positionZ.value - previousPositionRef.current.z;
-      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const differenceInX = currentX - previousPositionRef.current.x;
+    const differenceInZ = currentZ - previousPositionRef.current.z;
+    const distance = Math.sqrt(differenceInX * differenceInX + differenceInZ * differenceInZ);
 
-      if (distance >= distanceThreshold) {
-        runOnJS(onPathUpdate)({
-          x: positionX.value,
-          y: positionY.value,
-          z: positionZ.value,
-        });
-        previousPositionRef.current = {
-          x: positionX.value,
-          y: positionY.value,
-          z: positionZ.value,
-        };
-      }
+    if (distance < distanceThreshold || !Array.isArray(correctPath) || !correctPath.length) {
+      return;
     }
-  }
+
+    const newPathPoint = { x: currentX, z: currentZ };
+
+    let closestPoint = null;
+    let minDistance = Infinity;
+
+    correctPath.forEach((point) => {
+      const differenceInCorrectX = point.x - newPathPoint.x;
+      const differenceInCorrectZ = point.z - newPathPoint.z;
+      const correctDistance = Math.sqrt(
+        differenceInCorrectX * differenceInCorrectX + differenceInCorrectZ * differenceInCorrectZ,
+      );
+
+      if (correctDistance < minDistance) {
+        minDistance = correctDistance;
+        closestPoint = point;
+      }
+    });
+
+    if (!closestPoint || minDistance > distanceThreshold) {
+      return;
+    }
+
+    const isAlreadyInPath = ballPath.some(
+      (point) => point.x === closestPoint.x && point.z === closestPoint.z,
+    );
+
+    if (!isAlreadyInPath) {
+      handlePathUpdate(closestPoint);
+    }
+
+    previousPositionRef.current = { x: currentX, z: currentZ };
+  }, [correctPath, ballPath, handlePathUpdate, distanceThreshold]);
 
   useFrame((_, delta) => {
     if (isPaused) return;
 
-    if (ballMeshRef?.current && position?.current && landRef?.current) {
+    if (ballMeshRef.current && position.current && landRef.current) {
       previousPosition.current.copy(position.current);
 
       const adjustedX = accelData.x - initialTilt.current.x;
@@ -205,7 +154,7 @@ export default function Ball({
         landSlopeX = Math.abs(normal.x) > slopeThreshold ? normal.x : 0;
         landSlopeY = Math.abs(normal.y) > slopeThreshold ? normal.y : 0;
       } else if (position.current.y < deadZoneHeight) {
-        runOnJS(onGameOver)("fall");
+        onGameOver("fall");
       }
 
       velocity.current.x += (extraTiltX + landSlopeX) * delta * (sensitiveCount + 3);
@@ -243,45 +192,36 @@ export default function Ball({
         mesh.quaternion.copy(accumulatedQuaternion.current);
         mesh.position.set(position.current.x, position.current.y, position.current.z);
 
+        updateBallPosition(position.current);
+
         const ballPositionVector = new THREE.Vector3(
           position.current.x,
           position.current.y,
           position.current.z,
         );
 
-        ballPosition.current.copy(ballPositionVector);
-
         if (currentStage) {
           const startBox = new THREE.Box3().setFromObject(startZoneRef.current);
           const endBox = new THREE.Box3().setFromObject(endZoneRef.current);
 
           if (startBox.containsPoint(ballPositionVector)) {
-            runOnJS(onGameStart)();
+            onGameStart();
           }
           if (endBox.containsPoint(ballPositionVector)) {
-            runOnJS(onGameOver)("finish");
+            onGameOver("finish");
           }
         }
       }
 
-      if (frameCount.current % collisionCheckInterval === 0) {
-        const colliders = [...colliderRefs.current];
-        const collisionDetected = colliders.some((collider) =>
-          new THREE.Box3().setFromObject(collider).containsPoint(position.current),
-        );
+      const colliders = [...colliderRefs.current];
+      const collisionDetected = colliders.some((collider) =>
+        new THREE.Box3().setFromObject(collider).containsPoint(position.current),
+      );
 
-        if (collisionDetected) {
-          position.current.copy(previousPosition.current);
-          velocity.current.set(0, 0, 0);
-        }
+      if (collisionDetected) {
+        position.current.copy(previousPosition.current);
+        velocity.current.set(0, 0, 0);
       }
-
-      positionX.value = position.current.x;
-      positionY.value = position.current.y;
-      positionZ.value = position.current.z;
-
-      rotationX.value = accumulatedQuaternion.current.x;
-      rotationZ.value = accumulatedQuaternion.current.z;
 
       if (landRef.current) {
         const ballPositionVector = new THREE.Vector3(
@@ -289,6 +229,8 @@ export default function Ball({
           position.current.y,
           position.current.z,
         );
+
+        updateBallPath();
 
         landRef.current.traverse((child) => {
           if (
@@ -306,8 +248,6 @@ export default function Ball({
           }
         });
       }
-
-      updateBallPath();
       const uv = intersects[0]?.uv;
       if (uv) {
         const uvX = Math.floor(uv.x * 1024);
@@ -318,21 +258,9 @@ export default function Ball({
   });
 
   return (
-    <>
-      <mesh ref={ballMeshRef} castShadow>
-        <sphereGeometry args={[1, 16, 16]} />
-        <meshStandardMaterial map={ballTexture} />
-      </mesh>
-      {landModelUri && (
-        <ModelLoader
-          modelUri={landModelUri}
-          textureUri={landTextureUri}
-          onLoad={handleModelLoad}
-          dynamicTexture={dynamicTexture}
-          ballPosition={position.current}
-          brushRadius={0.01}
-        />
-      )}
-    </>
+    <mesh ref={ballMeshRef} castShadow>
+      <sphereGeometry args={[1, 16, 16]} />
+      <meshStandardMaterial map={ballTexture} />
+    </mesh>
   );
 }

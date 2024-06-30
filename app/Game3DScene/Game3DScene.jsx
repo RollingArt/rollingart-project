@@ -9,6 +9,7 @@ import { Audio } from "expo-av";
 import { Stage1Land, Stage2Land, TutorialStageLand } from "../../src/components/Land/Land";
 import Ball from "../../src/components/Ball/Ball";
 import CameraController from "../../src/components/CameraController/CameraController";
+import DynamicTextureApplier from "../../src/hooks/DynamicTextureApplier";
 
 import patternTexture1 from "../../assets/images/patternTexture1.png";
 import patternTexture2 from "../../assets/images/patternTexture2.png";
@@ -24,16 +25,28 @@ export default function Game3DScreen({
   reloadKey,
   sensitiveCount,
   currentStage,
+  correctPath,
+  setCorrectPath,
+  ballPath,
+  handlePathUpdate,
 }) {
-  // eslint-disable-next-line no-unused-vars
-  const [ballPath, setBallPath] = useState([]);
-  const [landLoaded, setLandLoaded] = useState(false);
-
-  const ballMeshRef = useRef();
   const landRef = useRef();
+  const ballMeshRef = useRef();
   const startZoneRef = useRef();
   const endZoneRef = useRef();
   const colliderRefs = useRef([]);
+
+  const ballPositionRef = useRef(new THREE.Vector3());
+  const [dynamicTexture, setDynamicTexture] = useState(null);
+
+  const [isGameStarted, setIsGameStarted] = useState(false);
+  const [isGameOver, setIsGameOver] = useState(false);
+  const [landLoaded, setLandLoaded] = useState(false);
+
+  const [patternIndex, setPatternIndex] = useState(0);
+  const patterns = useMemo(() => [patternTexture1, patternTexture2, patternTexture3]);
+  const selectedPattern = patterns[patternIndex];
+
   const gameBgm = useRef(new Audio.Sound());
 
   const [accelData, setAccelData] = useState({ x: 0, y: 0, z: 0 });
@@ -42,16 +55,51 @@ export default function Game3DScreen({
   const velocity = useRef({ x: 0, y: 0, z: 0 });
   const friction = 1.2;
 
-  const [patternIndex, setPatternIndex] = useState(0);
-  const patterns = useMemo(() => [patternTexture1, patternTexture2, patternTexture3]);
-  const selectedPattern = patterns[patternIndex];
+  useEffect(() => {
+    const texture = new THREE.DataTexture(
+      new Uint8Array(1024 * 1024 * 4),
+      1024,
+      1024,
+      THREE.RGBAFormat,
+    );
+    texture.needsUpdate = true;
+    setDynamicTexture(texture);
+  }, []);
+
+  const handleLoadModel = useCallback(
+    (scene) => {
+      landRef.current = scene;
+      if (correctPath.length) {
+        setLandLoaded(true);
+      }
+    },
+    [correctPath],
+  );
+
+  const handleUpdateBallPosition = useCallback((newPosition) => {
+    ballPositionRef.current.copy(newPosition);
+    if (landRef.current) {
+      landRef.current.traverse((child) => {
+        if (
+          child.isMesh &&
+          child.material &&
+          child.material.uniforms &&
+          child.material.uniforms.ballPosition
+        ) {
+          if (child.material.uniforms.ballPosition.value instanceof THREE.Vector3) {
+            child.material.uniforms.ballPosition.value.copy(newPosition);
+            if (child.material.uniforms.dynamicTexture.value) {
+              child.material.uniforms.dynamicTexture.value.needsUpdate = true;
+            }
+          }
+        }
+      });
+    }
+  }, []);
 
   const setColliderRef = (index) => (ref) => {
     colliderRefs.current[index] = ref;
   };
-
-  const [isGameStarted, setIsGameStarted] = useState(false);
-  const [isGameOver, setIsGameOver] = useState(false);
 
   useEffect(() => {
     loadSounds();
@@ -167,75 +215,68 @@ export default function Game3DScreen({
     };
   }, [reloadKey]);
 
-  const distance = useCallback(
-    (pos1, pos2) =>
-      Math.sqrt((pos1.x - pos2.x) ** 2 + (pos1.y - pos2.y) ** 2 + (pos1.z - pos2.z) ** 2),
-    [],
-  );
-
-  const handlePathUpdate = (newPosition) => {
-    setBallPath((prevPath) => {
-      const lastPosition = prevPath[prevPath.length - 1];
-      if (!lastPosition || distance(newPosition, lastPosition) > 2) {
-        return [...prevPath, newPosition];
-      }
-      return prevPath;
-    });
-  };
-
-  const setLandRef = useCallback((model) => {
-    landRef.current = model;
-    setLandLoaded(true);
-  }, []);
-
   return (
     <View style={currentStage === 2 ? styles.purpleContainer : styles.container}>
       <Canvas shadows>
         <ambientLight color={0xffffff} intensity={0.6} />
         <directionalLight color={0xffffff} intensity={1} position={[5, 5, 5]} castShadow />
         <CameraController followTarget={ballMeshRef} />
-        {currentStage === 0 && <TutorialStageLand setLandRef={setLandRef} />}
+        {currentStage === 0 && <TutorialStageLand setLandRef={handleLoadModel} />}
         {currentStage === 1 && (
           <Stage1Land
-            setLandRef={setLandRef}
+            setLandRef={handleLoadModel}
             setColliderRef={setColliderRef}
             startZoneRef={startZoneRef}
             endZoneRef={endZoneRef}
             onGameStart={onGameStart}
             onGameOver={onGameOver}
+            setCorrectPath={setCorrectPath}
           />
         )}
         {currentStage === 2 && (
           <Stage2Land
-            setLandRef={setLandRef}
+            setLandRef={handleLoadModel}
             setColliderRef={setColliderRef}
             startZoneRef={startZoneRef}
             endZoneRef={endZoneRef}
             onGameStart={onGameStart}
             onGameOver={onGameOver}
+            setCorrectPath={setCorrectPath}
           />
         )}
         {landLoaded && (
-          <Ball
-            ballMeshRef={ballMeshRef}
-            currentBallPatternTexture={selectedPattern}
-            initialPosition={position.current}
-            initialVelocity={velocity.current}
-            accelData={accelData}
-            friction={friction}
-            initialTilt={initialTilt}
-            onPathUpdate={handlePathUpdate}
-            landRef={landRef}
-            startZoneRef={startZoneRef}
-            endZoneRef={endZoneRef}
-            colliderRefs={colliderRefs}
-            onGameStart={handleGameStart}
-            onGameOver={handleGameOver}
-            isPaused={isPaused}
-            sensitiveCount={sensitiveCount}
-            currentStage={currentStage}
-            castShadow
-          />
+          <>
+            <Ball
+              ballMeshRef={ballMeshRef}
+              currentBallPatternTexture={selectedPattern}
+              initialPosition={position.current}
+              initialVelocity={velocity.current}
+              accelData={accelData}
+              friction={friction}
+              initialTilt={initialTilt}
+              handlePathUpdate={handlePathUpdate}
+              landRef={landRef}
+              startZoneRef={startZoneRef}
+              endZoneRef={endZoneRef}
+              colliderRefs={colliderRefs}
+              onGameStart={handleGameStart}
+              onGameOver={handleGameOver}
+              isPaused={isPaused}
+              sensitiveCount={sensitiveCount}
+              currentStage={currentStage}
+              correctPath={correctPath}
+              ballPath={ballPath}
+              updateBallPosition={handleUpdateBallPosition}
+              dynamicTexture={dynamicTexture}
+              castShadow
+            />
+            <DynamicTextureApplier
+              scene={landRef.current}
+              dynamicTexture={dynamicTexture}
+              ballPosition={ballPositionRef.current}
+              brushRadius={0.01}
+            />
+          </>
         )}
       </Canvas>
       {isOverlayVisible && <View style={styles.overlayContainer} />}

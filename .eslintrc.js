@@ -30,7 +30,7 @@ module.exports = {
     "prettier/prettier": ["error", { endOfLine: "auto" }],
     "no-multiple-empty-lines": ["error", { max: 1, maxEOF: 1, maxBOF: 0 }],
     "react/no-unknown-property": ["error", { ignore: ["position", "args", "map", "rotation", "intensity", "castShadow", "receiveShadow", "object", "transparent"] }],
-    "no-param-reassign": ["error", { "props": true, "ignorePropertyModificationsFor": ["texture", "child", "landRef"]}],
+    "no-param-reassign": ["error", { "props": true, "ignorePropertyModificationsFor": ["texture", "child", "landRef","dynamicTexture"]}],
     "no-unused-vars": "error",
     quotes: ["error", "double"],
     semi: ["error", "always"],
