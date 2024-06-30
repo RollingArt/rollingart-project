@@ -11,11 +11,28 @@ import filledStar from "../../../assets/images/filledStar.png";
 import successImage from "../../../assets/images/success.png";
 import failedImage from "../../../assets/images/fail.png";
 
-export default function GameResultModal({ visible, currentStage, gameResultMessage, timeLeft }) {
+export default function GameResultModal({
+  visible,
+  currentStage,
+  gameResultMessage,
+  timeLeft,
+  matchedRate,
+}) {
   const [storedStarData, setStoredStarData] = useState({});
+  const [completeAchievements, setCompleteAchievements] = useState({});
+  const [starCount, setStarCount] = useState(0);
+
   const router = useRouter();
-  const completeAchievements = checkAchievements(timeLeft);
-  const starCount = getStarCount(completeAchievements);
+
+  useEffect(() => {
+    if (visible) {
+      const newAchievements = checkAchievements(timeLeft, currentStage);
+      const newStarCount = getStarCount(newAchievements);
+      setCompleteAchievements(newAchievements);
+      setStarCount(newStarCount);
+      saveStarCount(currentStage, newStarCount);
+    }
+  }, [visible, matchedRate, timeLeft]);
 
   function handleMainButtonTouch() {
     router.replace("/MainScreen/MainScreen");
@@ -54,12 +71,27 @@ export default function GameResultModal({ visible, currentStage, gameResultMessa
     return 0;
   }
 
-  function checkAchievements(timeRemaining) {
-    return {
-      achievement1: timeRemaining > 5,
-      achievement2: timeRemaining > 20,
-      achievement3: timeRemaining > 10,
-    };
+  function checkAchievements(timeRemaining, stage) {
+    switch (stage) {
+      case 1:
+        return {
+          achievement1: matchedRate > 65,
+          achievement2: timeRemaining > 5,
+          achievement3: timeRemaining > 15,
+        };
+      case 2:
+        return {
+          achievement1: matchedRate > 60,
+          achievement2: timeRemaining > 10,
+          achievement3: timeRemaining > 20,
+        };
+      default:
+        return {
+          achievement1: "도전 과제 1",
+          achievement2: "도전 과제 2",
+          achievement3: "도전 과제 3",
+        };
+    }
   }
 
   function isAchievementCompleted(achievement) {
@@ -68,14 +100,6 @@ export default function GameResultModal({ visible, currentStage, gameResultMessa
     }
     return failedImage;
   }
-
-  useEffect(() => {
-    if (visible) {
-      const newAchievements = checkAchievements(timeLeft);
-      const newStarCount = getStarCount(newAchievements);
-      saveStarCount(currentStage, newStarCount);
-    }
-  }, [visible, starCount]);
 
   async function saveStarCount(stage, count) {
     const starData = await AsyncStorage.getItem("starData");
@@ -94,27 +118,28 @@ export default function GameResultModal({ visible, currentStage, gameResultMessa
       <View style={styles.modalBackGround}>
         <View style={styles.modalView}>
           <Text style={styles.messageText}>{gameOverMessage()}</Text>
+          {gameResultMessage === "finish" && <Text>일치율 {matchedRate}%</Text>}
           <View style={styles.starContainer}>
             <Image style={styles.smallStarImage} source={starCount >= 1 ? filledStar : emptyStar} />
             <Image style={styles.bigStarImage} source={starCount >= 2 ? filledStar : emptyStar} />
             <Image style={styles.smallStarImage} source={starCount >= 3 ? filledStar : emptyStar} />
           </View>
           <Text style={styles.challengeText}>
-            도전과제
+            일치율 {currentStage === 1 ? "65%" : "60%"} 이상
             <Image
               style={styles.challengeImage}
               source={isAchievementCompleted(completeAchievements.achievement1)}
             />
           </Text>
           <Text style={styles.challengeText}>
-            도전과제
+            남은 시간 {currentStage === 1 ? "5초" : "10초"} 이상
             <Image
               style={styles.challengeImage}
               source={isAchievementCompleted(completeAchievements.achievement2)}
             />
           </Text>
           <Text style={styles.challengeText}>
-            도전과제
+            남은 시간 {currentStage === 1 ? "15초" : "20초"} 이상
             <Image
               style={styles.challengeImage}
               source={isAchievementCompleted(completeAchievements.achievement3)}
@@ -154,7 +179,7 @@ const styles = StyleSheet.create({
   },
   modalView: {
     width: vw(80),
-    height: vh(50),
+    height: vh(58),
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 3,
