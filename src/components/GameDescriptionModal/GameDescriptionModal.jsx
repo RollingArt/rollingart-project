@@ -10,7 +10,7 @@ import pauseImage from "../../../assets/images/pauseImage.png";
 import sensitiveImage from "../../../assets/images/sensitiveImage.png";
 import timerImage from "../../../assets/images/timerImage.png";
 
-export default function GameDescriptionModal({ setIsPaused, setIsChallengeModalVisible }) {
+export default function GameDescriptionModal({ setIsPaused, onGameStart }) {
   const [descriptionImages, setDescriptionImages] = useState(0);
   const [visible, setVisible] = useState(true);
   const images = [homeImage, timerImage, pauseImage, sensitiveImage];
@@ -34,7 +34,7 @@ export default function GameDescriptionModal({ setIsPaused, setIsChallengeModalV
   async function handleCloseButtonTouch() {
     setVisible(false);
     setIsPaused(!visible);
-    setIsChallengeModalVisible(visible);
+    onGameStart(true);
   }
 
   function descriptionText1() {
