@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Image, StyleSheet } from "react-native";
+import { View, Image, StyleSheet, Platform, BackHandler } from "react-native";
 import { useRouter } from "expo-router";
 import { vw, vh } from "react-native-expo-viewport-units";
 
@@ -21,6 +21,12 @@ export default function MainScreen() {
     setIsExitGameModalVisible(false);
   }
 
+  function handleExitButtonTouch() {
+    if (Platform.OS === "android") {
+      BackHandler.exitApp();
+    }
+  }
+
   async function handleStartButtonTouch() {
     router.replace("/StageSelectScreen/StageSelectScreen");
   }
@@ -37,17 +43,19 @@ export default function MainScreen() {
             buttonText="게임 시작"
             onPress={handleStartButtonTouch}
           />
-          <CustomButton
-            containerStyle={[styles.button, styles.black]}
-            textStyle={styles.text}
-            buttonText="게임 종료"
-            onPress={handleOpenModal}
-          />
+          {Platform.OS === "ios" ? null : (
+            <CustomButton
+              containerStyle={[styles.button, styles.black]}
+              textStyle={styles.text}
+              buttonText="게임 종료"
+              onPress={handleOpenModal}
+            />
+          )}
         </View>
       </View>
       <ConfirmationModal
         visible={isExitGameModalVisible}
-        onLeftButtonTouch={null}
+        onLeftButtonTouch={handleExitButtonTouch}
         onRightButtonTouch={handleCloseModal}
         modalMessage="게임을 종료하시겠습니까?"
       />
@@ -65,13 +73,13 @@ const styles = StyleSheet.create({
   },
   logoImage: {
     width: vw(70),
-    marginTop: vh(8),
+    marginTop: Platform.OS === "ios" ? vh(13) : vh(8),
     resizeMode: "contain",
   },
   button: {
     width: vw(70),
     height: vh(7),
-    marginBottom: vw(5),
+    marginBottom: Platform.OS === "ios" ? vh(20) : vw(5),
     borderRadius: 10,
   },
   brightGreen: {
