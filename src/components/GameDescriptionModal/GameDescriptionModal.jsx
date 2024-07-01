@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   },
   rowWrapper: {
     width: "80%",
-    height: "40%",
+    height: Platform.OS === "ios" ? "46%" : "40%",
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
