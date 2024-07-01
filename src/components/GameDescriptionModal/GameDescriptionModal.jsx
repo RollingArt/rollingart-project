@@ -11,6 +11,7 @@ import sensitiveImage from "../../../assets/images/sensitiveImage.png";
 import timerImage from "../../../assets/images/timerImage.png";
 import gameResultImage from "../../../assets/images/gameResultImage.png";
 import stageImage from "../../../assets/images/stageImage.jpeg";
+import questionButtonImage from "../../../assets/images/questionButtonImage.png";
 
 export default function GameDescriptionModal({
   setIsPaused,
@@ -21,7 +22,15 @@ export default function GameDescriptionModal({
   descriptionImages,
   setDescriptionImages,
 }) {
-  const images = [homeImage, timerImage, pauseImage, sensitiveImage, stageImage, gameResultImage];
+  const images = [
+    homeImage,
+    timerImage,
+    pauseImage,
+    sensitiveImage,
+    stageImage,
+    gameResultImage,
+    questionButtonImage,
+  ];
 
   useEffect(() => {
     setIsPaused(true);
@@ -62,6 +71,8 @@ export default function GameDescriptionModal({
         return null;
       case 5:
         return "게임이 종료되면 보이는 화면입니다.";
+      case 6:
+        return "튜토리얼 모드에만 존재하는 버튼입니다.";
       default:
         return "오류가 발생했습니다. 게임을 다시 시작해주세요.";
     }
@@ -81,6 +92,8 @@ export default function GameDescriptionModal({
         return "스테이지를 위에서 바라본 모습입니다.";
       case 5:
         return "도전 과제를 달성하면 별을 획득합니다.";
+      case 6:
+        return "터치하면 게임 설명을 다시 읽을 수 있습니다.";
       default:
         return "오류가 발생했습니다. 게임을 다시 시작해주세요.";
     }
@@ -100,6 +113,8 @@ export default function GameDescriptionModal({
         return "스테이지의 길을 따라 공으로 그림을 그려보세요!";
       case 5:
         return "도전 과제를 클리어해 별을 획득해보세요!";
+      case 6:
+        return null;
       default:
         return "오류가 발생했습니다. 게임을 다시 시작해주세요.";
     }
@@ -118,10 +133,10 @@ export default function GameDescriptionModal({
               />
             </TouchableOpacity>
             <Image source={images[descriptionImages]} style={styles.descriptionImage} />
-            <TouchableOpacity onPress={descriptionImages < 5 ? handleNextImageButtonTouch : null}>
+            <TouchableOpacity onPress={descriptionImages < 6 ? handleNextImageButtonTouch : null}>
               <Image
                 style={
-                  descriptionImages < 5
+                  descriptionImages < 6
                     ? [styles.arrowImage, { transform: [{ scaleX: -1 }] }]
                     : [styles.arrowImageBlurred, { transform: [{ scaleX: -1 }] }]
                 }
