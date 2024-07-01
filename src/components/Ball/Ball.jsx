@@ -134,7 +134,7 @@ export default function Ball({
 
       let landHeight = null;
       let landSlopeX = 0;
-      let landSlopeY = 0;
+      let landSlopeZ = 0;
       const slopeThreshold = 1;
 
       raycaster.current.set(
@@ -153,23 +153,24 @@ export default function Ball({
 
         const { normal } = intersects[0].face;
         landSlopeX = Math.abs(normal.x) > slopeThreshold ? normal.x : 0;
-        landSlopeY = Math.abs(normal.y) > slopeThreshold ? normal.y : 0;
+        landSlopeZ = Math.abs(normal.z) > slopeThreshold ? normal.z : 0;
       } else if (position.current.y < deadZoneHeight) {
         onGameOver("fall");
       }
 
       velocity.current.x += (extraTiltX + landSlopeX) * delta * (sensitiveCount + 3);
-      velocity.current.z += (extraTiltY + landSlopeY) * delta * (sensitiveCount + 3);
+      velocity.current.z += (extraTiltY + landSlopeZ) * delta * (sensitiveCount + 3);
       velocity.current.y += gravity * delta;
 
       velocity.current.x *= 1 - friction * delta;
       velocity.current.z *= 1 - friction * delta;
 
-      if (Math.abs(velocity.current.x) > 0.1 || Math.abs(velocity.current.z) > 0.1) {
-        position.current.x += velocity.current.x * delta * 2;
-        position.current.z += velocity.current.z * delta * 2;
-        position.current.y += velocity.current.y * delta * 2;
-      }
+      if (Math.abs(velocity.current.x) < 0.05) velocity.current.x = 0;
+      if (Math.abs(velocity.current.z) < 0.05) velocity.current.z = 0;
+
+      position.current.x += velocity.current.x * delta * 2;
+      position.current.z += velocity.current.z * delta * 2;
+      position.current.y += velocity.current.y * delta * 2;
 
       const moveDirection = new THREE.Vector3(
         velocity.current.x,
