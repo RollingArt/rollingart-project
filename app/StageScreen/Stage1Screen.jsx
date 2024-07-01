@@ -8,7 +8,6 @@ import Game3DScene from "../Game3DScene/Game3DScene";
 import useTimer from "../../src/hooks/useTimer";
 import ConfirmationModal from "../../src/components/ConfirmationModal/ConfirmationModal";
 import GameResultModal from "../../src/components/GameResultModal/GameResultModal";
-import GameDescriptionModal from "../../src/components/GameDescriptionModal/GameDescriptionModal";
 import ChallengeModal from "../../src/components/ChallengeModal/ChallengeModal";
 
 import MainButtonImage from "../../assets/images/home.png";
@@ -24,13 +23,10 @@ export default function Stage1Screen() {
   const [isSensitiveButtonVisible, setIsSensitiveButtonVisible] = useState(true);
   const [isPauseButtonVisible, setIsPauseButtonVisible] = useState(true);
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
+  const [isPaused, setIsPaused] = useState(true);
   const [isMainModalVisible, setIsMainModalVisible] = useState(false);
   const [isGameResultModalVisible, setIsGameResultModalVisible] = useState(false);
   const [gameResultMessage, setGameResultMessage] = useState("");
-  const [isGameDescriptionModalVisible, setIsGameDescriptionModalVisible] = useState({});
-  const [isChallengeModalVisible, setIsChallengeModalVisible] = useState(false);
-  const [gameStarted, setGameStarted] = useState(false);
   const [ballPath, setBallPath] = useState([]);
   const [correctPath, setCorrectPath] = useState([]);
   const [matchedRate, setMatchedRate] = useState(0);
@@ -55,17 +51,6 @@ export default function Stage1Screen() {
       subscription.remove();
     };
   }, [timeLeft, isPaused, sensitiveCount, isPauseButtonVisible]);
-
-  useEffect(() => {
-    showGameDescriptionModal();
-  }, []);
-
-  async function showGameDescriptionModal() {
-    const starData = await AsyncStorage.getItem("starData");
-    if (starData) {
-      setIsGameDescriptionModalVisible(JSON.parse(starData));
-    }
-  }
 
   async function handleAppStateChange(nextAppState) {
     if (appState.current.match(/inactive|background/) && nextAppState === "active") {
@@ -115,7 +100,9 @@ export default function Stage1Screen() {
     setIsPauseButtonVisible(true);
     setIsOverlayVisible(false);
     setIsPaused(false);
-    startTimer();
+    if (!isSensitiveButtonVisible) {
+      startTimer();
+    }
   }
 
   function handleMainButtonTouch() {
@@ -126,8 +113,10 @@ export default function Stage1Screen() {
 
   function handleRightButtonTouch() {
     setIsMainModalVisible(false);
-    setIsPaused(false);
-    startTimer();
+    if (isPauseButtonVisible) {
+      setIsPaused(false);
+      startTimer();
+    }
   }
 
   function handleLeftButtonTouch() {
@@ -151,8 +140,6 @@ export default function Stage1Screen() {
     hasGameStarted.current = true;
     startTimer();
     setIsSensitiveButtonVisible(false);
-    setIsChallengeModalVisible(false);
-    setGameStarted(true);
   }
 
   async function onGameOver(message) {
@@ -224,19 +211,7 @@ export default function Stage1Screen() {
           </View>
         ) : null}
       </View>
-      {isGameDescriptionModalVisible[1] <= 1 ? (
-        <GameDescriptionModal
-          setIsPaused={setIsPaused}
-          setIsChallengeModalVisible={setIsChallengeModalVisible}
-        />
-      ) : null}
-      {isGameDescriptionModalVisible[1] > 1 ? (
-        <ChallengeModal currentStage={currentStage} gameStarted={gameStarted} />
-      ) : (
-        isChallengeModalVisible && (
-          <ChallengeModal currentStage={currentStage} gameStarted={gameStarted} />
-        )
-      )}
+      <ChallengeModal currentStage={currentStage} setIsPaused={setIsPaused} />
       <GameResultModal
         visible={isGameResultModalVisible}
         currentStage={currentStage}
