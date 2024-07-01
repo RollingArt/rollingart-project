@@ -323,6 +323,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     justifyContent: "center",
     alignItems: "center",
+    zIndex: 1,
   },
   specialText: {
     color: "#ff7f00",
