@@ -301,6 +301,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     justifyContent: "center",
     alignItems: "center",
+    zIndex: 1,
   },
   infoText: {
     fontSize: 20,
