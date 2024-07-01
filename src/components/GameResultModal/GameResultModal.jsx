@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
-import { Modal, View, Text, Image, StyleSheet } from "react-native";
+import { Modal, View, Text, Image, StyleSheet, Platform } from "react-native";
 import { vw, vh } from "react-native-expo-viewport-units";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
   },
   modalView: {
     width: vw(80),
-    height: vh(58),
+    height: Platform.OS === "ios" ? vh(51) : vh(58),
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 3,

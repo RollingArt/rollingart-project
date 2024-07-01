@@ -23,11 +23,10 @@ export default function Stage2Screen() {
   const [isSensitiveButtonVisible, setIsSensitiveButtonVisible] = useState(true);
   const [isPauseButtonVisible, setIsPauseButtonVisible] = useState(true);
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
+  const [isPaused, setIsPaused] = useState(true);
   const [isMainModalVisible, setIsMainModalVisible] = useState(false);
   const [isGameResultModalVisible, setIsGameResultModalVisible] = useState(false);
   const [gameResultMessage, setGameResultMessage] = useState("");
-  const [gameStarted, setGameStarted] = useState(false);
   const [ballPath, setBallPath] = useState([]);
   const [correctPath, setCorrectPath] = useState([]);
   const [matchedRate, setMatchedRate] = useState(0);
@@ -101,7 +100,9 @@ export default function Stage2Screen() {
     setIsPauseButtonVisible(true);
     setIsOverlayVisible(false);
     setIsPaused(false);
-    startTimer();
+    if (!isSensitiveButtonVisible) {
+      startTimer();
+    }
   }
 
   function handleMainButtonTouch() {
@@ -112,8 +113,10 @@ export default function Stage2Screen() {
 
   function handleRightButtonTouch() {
     setIsMainModalVisible(false);
-    setIsPaused(false);
-    startTimer();
+    if (isPauseButtonVisible) {
+      setIsPaused(false);
+      startTimer();
+    }
   }
 
   function handleLeftButtonTouch() {
@@ -137,7 +140,6 @@ export default function Stage2Screen() {
     hasGameStarted.current = true;
     startTimer();
     setIsSensitiveButtonVisible(false);
-    setGameStarted(true);
   }
 
   async function onGameOver(message) {
@@ -197,7 +199,6 @@ export default function Stage2Screen() {
             </TouchableOpacity>
           )}
         </View>
-        <ChallengeModal currentStage={currentStage} gameStarted={gameStarted} />
         {isSensitiveButtonVisible ? (
           <View style={styles.countContainer}>
             <TouchableOpacity onPress={handleDecreaseCount}>
@@ -210,6 +211,7 @@ export default function Stage2Screen() {
           </View>
         ) : null}
       </View>
+      <ChallengeModal currentStage={currentStage} setIsPaused={setIsPaused} />
       <GameResultModal
         visible={isGameResultModalVisible}
         currentStage={currentStage}
