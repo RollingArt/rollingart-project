@@ -108,7 +108,7 @@ export default function GameDescriptionModal({
   function descriptionText3() {
     switch (descriptionImages) {
       case 0:
-        return "튜토리얼을 통해 사용감을 익혀보세요!";
+        return "튜토리얼을 통해 조작감을 익혀보세요!";
       case 1:
         return null;
       case 2:
@@ -155,13 +155,11 @@ export default function GameDescriptionModal({
           <Text style={styles.descriptionText1}>{descriptionText1()}</Text>
           <Text style={styles.descriptionText2}>{descriptionText2()}</Text>
           <Text style={styles.descriptionText2}>{descriptionText3()}</Text>
-          <View>
-            <CustomButton
-              containerStyle={styles.closeButton}
-              buttonText="설명 닫기"
-              onPress={handleCloseButtonTouch}
-            />
-          </View>
+          <CustomButton
+            containerStyle={styles.closeButton}
+            buttonText="설명 닫기"
+            onPress={handleCloseButtonTouch}
+          />
         </View>
       </View>
     </Modal>
@@ -176,8 +174,9 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.9)",
   },
   modalView: {
-    width: vw(85),
-    height: Platform.OS === "ios" ? vh(60) : vh(73),
+    width: Platform.OS === "ios" ? vw(85) : vw(88),
+    height: Platform.OS === "ios" ? vh(60) : vh(78),
+    padding: 8,
     alignItems: "center",
     borderWidth: 3,
     borderStyle: "solid",
@@ -187,15 +186,16 @@ const styles = StyleSheet.create({
   },
   rowWrapper: {
     width: "80%",
-    height: "46%",
+    height: "40%",
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
   },
   closeButton: {
+    position: "absolute",
     backgroundColor: "#DAF7D9",
+    top: "88%",
     width: vw(30),
-    marginHorizontal: 15,
     marginTop: vh(3),
     padding: 10,
   },

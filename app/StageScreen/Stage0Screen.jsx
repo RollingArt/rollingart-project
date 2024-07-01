@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { vh, vw } from "react-native-expo-viewport-units";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import LoadingScreen from "../LoadingScreen/LoadingScreen";
 import Game3DScene from "../Game3DScene/Game3DScene";
 import useTimer from "../../src/hooks/useTimer";
 import ConfirmationModal from "../../src/components/ConfirmationModal/ConfirmationModal";
@@ -20,6 +21,8 @@ import decreaseImage from "../../assets/images/decrease.png";
 const GAME_STATE_KEY = "gameState";
 
 export default function Stage0Screen() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAnimating, setIsAnimating] = useState(true);
   const [sensitiveCount, setSensitiveCount] = useState(5);
   const [isPauseButtonVisible, setIsPauseButtonVisible] = useState(true);
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
@@ -151,6 +154,20 @@ export default function Stage0Screen() {
 
   return (
     <>
+      {isLoading && (
+        <View style={styles.loadingOverlay}>
+          <LoadingScreen />
+        </View>
+      )}
+      {isAnimating && (
+        <View style={styles.centered}>
+          <View style={styles.textInfoContainer}>
+            <Text style={styles.infoText}>
+              자유롭게 그리며 <Text style={styles.specialText}>조작감</Text>을 익혀보세요!
+            </Text>
+          </View>
+        </View>
+      )}
       <View style={styles.container}>
         <Game3DScene
           isOverlayVisible={isOverlayVisible}
@@ -160,6 +177,10 @@ export default function Stage0Screen() {
           reloadKey={appState.current}
           sensitiveCount={sensitiveCount}
           currentStage={currentStage}
+          setIsLoading={setIsLoading}
+          isLoading={isLoading}
+          setIsAnimating={setIsAnimating}
+          isAnimating={isAnimating}
         />
         <View style={styles.uiContainer}>
           <TouchableOpacity onPress={handleMainButtonTouch}>
@@ -194,15 +215,17 @@ export default function Stage0Screen() {
           </TouchableOpacity>
         </View>
       </View>
-      <GameDescriptionModal
-        setIsPaused={setIsPaused}
-        onGameStart={onGameStart}
-        setIsGameDescriptionModalVisible={setIsGameDescriptionModalVisible}
-        isGameDescriptionModalVisible={isGameDescriptionModalVisible}
-        isPauseButtonVisible={isPauseButtonVisible}
-        descriptionImages={descriptionImages}
-        setDescriptionImages={setDescriptionImages}
-      />
+      {!isLoading && !isAnimating && (
+        <GameDescriptionModal
+          setIsPaused={setIsPaused}
+          onGameStart={onGameStart}
+          setIsGameDescriptionModalVisible={setIsGameDescriptionModalVisible}
+          isGameDescriptionModalVisible={isGameDescriptionModalVisible}
+          isPauseButtonVisible={isPauseButtonVisible}
+          descriptionImages={descriptionImages}
+          setDescriptionImages={setDescriptionImages}
+        />
+      )}
       <TutorialResultModal visible={isGameResultModalVisible} currentStage={currentStage} />
       <ConfirmationModal
         visible={isMainModalVisible}
@@ -275,5 +298,38 @@ const styles = StyleSheet.create({
     fontSize: 50,
     fontWeight: "bold",
     color: "#49a246",
+  },
+  textInfoContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    width: vw(90),
+    height: vh(7),
+    top: 130,
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
+    borderRadius: 10,
+    zIndex: 1,
+  },
+  infoText: {
+    fontSize: 20,
+    textAlign: "center",
+    fontWeight: "bold",
+    color: "#0f0f0f",
+    textShadowColor: "#fff",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  centered: {
+    width: vw(100),
+    position: "absolute",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  specialText: {
+    color: "#ff7f00",
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 10,
+    backgroundColor: "#fff",
   },
 });

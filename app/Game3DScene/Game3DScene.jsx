@@ -85,7 +85,7 @@ export default function Game3DScreen({
       landRef.current = scene;
       setLandLoaded(true);
     },
-    [correctPath],
+    [landRef],
   );
 
   const handleUpdateBallPosition = useCallback((newPosition) => {

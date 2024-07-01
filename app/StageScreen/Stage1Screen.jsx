@@ -207,7 +207,7 @@ export default function Stage1Screen() {
             <Image style={styles.Images} source={MainButtonImage} />
           </TouchableOpacity>
           <View style={styles.textContainer}>
-            <Text style={styles.stageText}>stage 1</Text>
+            <Text style={styles.stageText}>Stage 1</Text>
             <Text style={styles.timeText}>{timeLeft}</Text>
           </View>
           {isPauseButtonVisible ? (
@@ -306,10 +306,10 @@ const styles = StyleSheet.create({
     fontSize: 20,
     textAlign: "center",
     fontWeight: "bold",
-    color: "#0f0f0f", // Text 색상
-    textShadowColor: "#fff", // 테두리 색상
+    color: "#0f0f0f",
+    textShadowColor: "#fff",
     textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2, // 테두리 둥글기
+    textShadowRadius: 2,
   },
   Images: {
     width: vw(10),
@@ -337,6 +337,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   specialText: {
-    color: "#ff7f00", // 특정 글자의 색상 변경
+    color: "#ff7f00",
   },
 });

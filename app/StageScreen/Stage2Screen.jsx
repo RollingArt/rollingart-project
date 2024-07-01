@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { vh, vw } from "react-native-expo-viewport-units";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import LoadingScreen from "../LoadingScreen/LoadingScreen";
 import Game3DScene from "../Game3DScene/Game3DScene";
 import useTimer from "../../src/hooks/useTimer";
 import ConfirmationModal from "../../src/components/ConfirmationModal/ConfirmationModal";
@@ -19,6 +20,8 @@ import decreaseImage from "../../assets/images/decrease.png";
 const GAME_STATE_KEY = "gameState";
 
 export default function Stage2Screen() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAnimating, setIsAnimating] = useState(true);
   const [sensitiveCount, setSensitiveCount] = useState(5);
   const [isSensitiveButtonVisible, setIsSensitiveButtonVisible] = useState(true);
   const [isPauseButtonVisible, setIsPauseButtonVisible] = useState(true);
@@ -167,6 +170,20 @@ export default function Stage2Screen() {
 
   return (
     <>
+      {isLoading && (
+        <View style={styles.loadingOverlay}>
+          <LoadingScreen />
+        </View>
+      )}
+      {isAnimating && (
+        <View style={styles.centered}>
+          <View style={styles.textInfoContainer}>
+            <Text style={styles.infoText}>
+              길을 따라 <Text style={styles.specialText}>토끼</Text>을 정확하게 그려보세요!
+            </Text>
+          </View>
+        </View>
+      )}
       <View style={styles.container}>
         <Game3DScene
           isOverlayVisible={isOverlayVisible}
@@ -180,13 +197,17 @@ export default function Stage2Screen() {
           setCorrectPath={setCorrectPath}
           handlePathUpdate={handlePathUpdate}
           ballPath={ballPath}
+          setIsLoading={setIsLoading}
+          isLoading={isLoading}
+          setIsAnimating={setIsAnimating}
+          isAnimating={isAnimating}
         />
         <View style={styles.uiContainer}>
           <TouchableOpacity onPress={handleMainButtonTouch}>
             <Image style={styles.Images} source={MainButtonImage} />
           </TouchableOpacity>
           <View style={styles.textContainer}>
-            <Text style={styles.stageText}>stage 2</Text>
+            <Text style={styles.stageText}>Stage 2</Text>
             <Text style={styles.timeText}>{timeLeft}</Text>
           </View>
           {isPauseButtonVisible ? (
@@ -211,7 +232,7 @@ export default function Stage2Screen() {
           </View>
         ) : null}
       </View>
-      <ChallengeModal currentStage={currentStage} setIsPaused={setIsPaused} />
+      {!isAnimating && <ChallengeModal currentStage={currentStage} setIsPaused={setIsPaused} />}
       <GameResultModal
         visible={isGameResultModalVisible}
         currentStage={currentStage}
@@ -265,6 +286,31 @@ const styles = StyleSheet.create({
     borderColor: "#49a246",
     backgroundColor: "rgba(218, 247, 217, 0.4)",
   },
+  textInfoContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    width: vw(90),
+    height: vh(7),
+    top: 130,
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
+    borderRadius: 10,
+    zIndex: 1,
+  },
+  centered: {
+    width: vw(100),
+    position: "absolute",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  infoText: {
+    fontSize: 20,
+    textAlign: "center",
+    fontWeight: "bold",
+    color: "#0f0f0f",
+    textShadowColor: "#fff",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
   Images: {
     width: vw(10),
     height: vh(10),
@@ -284,5 +330,13 @@ const styles = StyleSheet.create({
     fontSize: 50,
     fontWeight: "bold",
     color: "#49a246",
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 10,
+    backgroundColor: "#fff",
+  },
+  specialText: {
+    color: "#ff7f00",
   },
 });
