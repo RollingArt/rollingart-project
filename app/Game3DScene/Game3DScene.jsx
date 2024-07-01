@@ -29,6 +29,10 @@ export default function Game3DScreen({
   setCorrectPath,
   ballPath,
   handlePathUpdate,
+  setIsLoading,
+  isLoading,
+  setIsAnimating,
+  isAnimating,
 }) {
   const landRef = useRef();
   const ballMeshRef = useRef();
@@ -36,12 +40,13 @@ export default function Game3DScreen({
   const endZoneRef = useRef();
   const colliderRefs = useRef([]);
 
-  const ballPositionRef = useRef(new THREE.Vector3());
+  const ballPositionRef = useRef(new THREE.Vector3(0, 1, 140));
   const [dynamicTexture, setDynamicTexture] = useState(null);
 
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
   const [landLoaded, setLandLoaded] = useState(false);
+  const [isBallLoaded, setIsBallLoaded] = useState(false);
 
   const [patternIndex, setPatternIndex] = useState(0);
   const patterns = useMemo(() => [patternTexture1, patternTexture2, patternTexture3]);
@@ -51,7 +56,7 @@ export default function Game3DScreen({
 
   const [accelData, setAccelData] = useState({ x: 0, y: 0, z: 0 });
   const initialTilt = useRef({ x: 0, y: 0, z: 0 });
-  const position = useRef({ x: 0, y: 0, z: 140 });
+  const position = useRef({ x: 0, y: 1, z: 140 });
   const velocity = useRef({ x: 0, y: 0, z: 0 });
   const friction = 1.2;
 
@@ -65,6 +70,15 @@ export default function Game3DScreen({
     texture.needsUpdate = true;
     setDynamicTexture(texture);
   }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (landLoaded && isBallLoaded && isLoading) {
+        setIsLoading(false);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [landLoaded, isBallLoaded, isLoading]);
 
   const handleLoadModel = useCallback(
     (scene) => {
@@ -218,7 +232,11 @@ export default function Game3DScreen({
       <Canvas shadows>
         <ambientLight color={0xffffff} intensity={0.6} />
         <directionalLight color={0xffffff} intensity={1} position={[5, 5, 5]} castShadow />
-        <CameraController followTarget={ballMeshRef} />
+        <CameraController
+          followTarget={ballMeshRef}
+          isAnimating={isAnimating}
+          setIsAnimating={setIsAnimating}
+        />
         {currentStage === 0 && <TutorialStageLand setLandRef={handleLoadModel} />}
         {currentStage === 1 && (
           <Stage1Land
@@ -242,40 +260,38 @@ export default function Game3DScreen({
             setCorrectPath={setCorrectPath}
           />
         )}
-        {landLoaded && (
-          <>
-            <Ball
-              ballMeshRef={ballMeshRef}
-              currentBallPatternTexture={selectedPattern}
-              initialPosition={position.current}
-              initialVelocity={velocity.current}
-              accelData={accelData}
-              friction={friction}
-              initialTilt={initialTilt}
-              handlePathUpdate={handlePathUpdate}
-              landRef={landRef}
-              startZoneRef={startZoneRef}
-              endZoneRef={endZoneRef}
-              colliderRefs={colliderRefs}
-              onGameStart={handleGameStart}
-              onGameOver={handleGameOver}
-              isPaused={isPaused}
-              sensitiveCount={sensitiveCount}
-              currentStage={currentStage}
-              correctPath={correctPath}
-              ballPath={ballPath}
-              updateBallPosition={handleUpdateBallPosition}
-              dynamicTexture={dynamicTexture}
-              castShadow
-            />
-            <DynamicTextureApplier
-              scene={landRef.current}
-              dynamicTexture={dynamicTexture}
-              ballPosition={ballPositionRef.current}
-              brushRadius={0.01}
-            />
-          </>
-        )}
+        <Ball
+          ballMeshRef={ballMeshRef}
+          currentBallPatternTexture={selectedPattern}
+          initialPosition={position.current}
+          initialVelocity={velocity.current}
+          accelData={accelData}
+          friction={friction}
+          initialTilt={initialTilt}
+          handlePathUpdate={handlePathUpdate}
+          landRef={landRef}
+          startZoneRef={startZoneRef}
+          endZoneRef={endZoneRef}
+          colliderRefs={colliderRefs}
+          onGameStart={handleGameStart}
+          onGameOver={handleGameOver}
+          isPaused={isPaused}
+          sensitiveCount={sensitiveCount}
+          currentStage={currentStage}
+          correctPath={correctPath}
+          ballPath={ballPath}
+          updateBallPosition={handleUpdateBallPosition}
+          dynamicTexture={dynamicTexture}
+          setIsBallLoaded={setIsBallLoaded}
+          isAnimating={isAnimating}
+          castShadow
+        />
+        <DynamicTextureApplier
+          scene={landRef.current}
+          dynamicTexture={dynamicTexture}
+          ballPosition={ballPositionRef.current}
+          brushRadius={0.01}
+        />
       </Canvas>
       {isOverlayVisible && <View style={styles.overlayContainer} />}
     </View>
