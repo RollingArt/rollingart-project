@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { vw, vh } from "react-native-expo-viewport-units";
@@ -84,7 +84,6 @@ export default function StageSelectScreen() {
           cardButtonStyle={styles.enableCardButton}
           stageLevel="Tutorial"
           id={0}
-          starCount={starCounts[1] || 0}
           onStageCardPress={handleStageCardButtonTouch}
         />
         <StageCardButton
@@ -121,14 +120,14 @@ const styles = StyleSheet.create({
   buttonContainer: {
     width: vw(30),
     height: vh(6),
-    marginTop: vh(22),
+    marginTop: vh(24),
     backgroundColor: "#38D530",
     borderRadius: 5,
   },
   cardWrapper: {
     justifyContent: "space-between",
     height: vh(42),
-    marginVertical: 36,
+    marginVertical: Platform.OS === "ios" ? 10 : 36,
   },
   enableCardButton: {
     width: vw(50),
