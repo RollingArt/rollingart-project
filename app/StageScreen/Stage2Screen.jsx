@@ -179,7 +179,7 @@ export default function Stage2Screen() {
         <View style={styles.centered}>
           <View style={styles.textInfoContainer}>
             <Text style={styles.infoText}>
-              길을 따라 <Text style={styles.specialText}>토끼</Text>을 정확하게 그려보세요!
+              길을 따라 <Text style={styles.specialText}>토끼</Text>를 정확하게 그려보세요!
             </Text>
           </View>
         </View>
