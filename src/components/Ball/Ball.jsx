@@ -1,4 +1,4 @@
-import { useMemo, useRef, useCallback } from "react";
+import { useMemo, useRef, useCallback, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -24,6 +24,8 @@ export default function Ball({
   dynamicTexture,
   ballPath,
   correctPath,
+  setIsBallLoaded,
+  isAnimating,
 }) {
   const accumulatedQuaternion = useRef(new THREE.Quaternion());
   const position = useRef(
@@ -36,7 +38,7 @@ export default function Ball({
     new THREE.Vector3(initialPosition.x, initialPosition.y, initialPosition.z),
   );
   const raycaster = useRef(new THREE.Raycaster());
-  const previousPositionRef = useRef({ x: 0, y: 0, z: 0 });
+  const previousPositionRef = useRef({ x: 0, y: 1, z: 140 });
 
   const gravity = -9.8;
   const distanceThreshold = 3;
@@ -73,6 +75,11 @@ export default function Ball({
     }
     dynamicTexture.needsUpdate = true;
   }
+  useEffect(() => {
+    if (ballMeshRef.current) {
+      setIsBallLoaded(true);
+    }
+  }, [setIsBallLoaded, ballMeshRef]);
 
   const updateBallPath = useCallback(() => {
     const currentX = Math.floor(position.current.x);
@@ -122,10 +129,36 @@ export default function Ball({
   }, [correctPath, ballPath, handlePathUpdate, distanceThreshold]);
 
   useFrame((_, delta) => {
-    if (isPaused) return;
-
     if (ballMeshRef.current && position.current && landRef.current) {
       previousPosition.current.copy(position.current);
+
+      if (ballMeshRef.current) {
+        const mesh = ballMeshRef.current;
+        mesh.quaternion.copy(accumulatedQuaternion.current);
+        mesh.position.set(position.current.x, position.current.y, position.current.z);
+
+        updateBallPosition(position.current);
+
+        const ballPositionVector = new THREE.Vector3(
+          position.current.x,
+          position.current.y,
+          position.current.z,
+        );
+
+        if (currentStage) {
+          const startBox = new THREE.Box3().setFromObject(startZoneRef.current);
+          const endBox = new THREE.Box3().setFromObject(endZoneRef.current);
+
+          if (startBox.containsPoint(ballPositionVector)) {
+            onGameStart();
+          }
+          if (endBox.containsPoint(ballPositionVector)) {
+            onGameOver("finish");
+          }
+        }
+      }
+
+      if (isPaused || isAnimating) return;
 
       const adjustedX = accelData.x - initialTilt.current.x;
       const adjustedY = -(accelData.y - initialTilt.current.y);
@@ -189,32 +222,6 @@ export default function Ball({
       quaternion.setFromAxisAngle(rotationAxis, rotationSpeed);
       accumulatedQuaternion.current.multiplyQuaternions(quaternion, accumulatedQuaternion.current);
 
-      if (ballMeshRef.current) {
-        const mesh = ballMeshRef.current;
-        mesh.quaternion.copy(accumulatedQuaternion.current);
-        mesh.position.set(position.current.x, position.current.y, position.current.z);
-
-        updateBallPosition(position.current);
-
-        const ballPositionVector = new THREE.Vector3(
-          position.current.x,
-          position.current.y,
-          position.current.z,
-        );
-
-        if (currentStage) {
-          const startBox = new THREE.Box3().setFromObject(startZoneRef.current);
-          const endBox = new THREE.Box3().setFromObject(endZoneRef.current);
-
-          if (startBox.containsPoint(ballPositionVector)) {
-            onGameStart();
-          }
-          if (endBox.containsPoint(ballPositionVector)) {
-            onGameOver("finish");
-          }
-        }
-      }
-
       const colliders = [...colliderRefs.current];
       const collisionDetected = colliders.some((collider) =>
         new THREE.Box3().setFromObject(collider).containsPoint(position.current),
@@ -261,7 +268,7 @@ export default function Ball({
 
   return (
     <mesh ref={ballMeshRef} castShadow>
-      <sphereGeometry args={[1, 16, 16]} />
+      <sphereGeometry args={[1.5, 16, 16]} />
       <meshStandardMaterial map={ballTexture} />
     </mesh>
   );

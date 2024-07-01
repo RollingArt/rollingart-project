@@ -41,8 +41,6 @@ function StageCardButton({
 
 export default function StageSelectScreen() {
   const [starCounts, setStarCounts] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedStage, setSelectedStage] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -57,19 +55,8 @@ export default function StageSelectScreen() {
   }
 
   function handleStageCardButtonTouch(id) {
-    setSelectedStage(id);
-    setIsLoading(true);
+    router.replace(`/StageScreen/Stage${id}Screen`);
   }
-
-  useEffect(() => {
-    if (isLoading && selectedStage !== null) {
-      router.replace("/LoadingScreen/LoadingScreen");
-      setTimeout(() => {
-        setIsLoading(false);
-        router.replace(`/StageScreen/Stage${selectedStage}Screen`);
-      }, 2000);
-    }
-  }, [isLoading, selectedStage]);
 
   function handleMainButtonTouch() {
     router.replace("/MainScreen/MainScreen");
