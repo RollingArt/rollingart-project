@@ -7,11 +7,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Game3DScene from "../Game3DScene/Game3DScene";
 import useTimer from "../../src/hooks/useTimer";
 import ConfirmationModal from "../../src/components/ConfirmationModal/ConfirmationModal";
-import GameResultModal from "../../src/components/GameResultModal/GameResultModal";
+import TutorialResultModal from "../../src/components/GameResultModal/TutorialResultModal";
 import GameDescriptionModal from "../../src/components/GameDescriptionModal/GameDescriptionModal";
 
 import MainButtonImage from "../../assets/images/home.png";
 import pauseButtonImage from "../../assets/images/pause.png";
+import questionImage from "../../assets/images/questionImage.png";
 import playButtonImage from "../../assets/images/play.png";
 import increaseImage from "../../assets/images/increase.png";
 import decreaseImage from "../../assets/images/decrease.png";
@@ -26,7 +27,8 @@ export default function Stage0Screen() {
   const [isPaused, setIsPaused] = useState(false);
   const [isMainModalVisible, setIsMainModalVisible] = useState(false);
   const [isGameResultModalVisible, setIsGameResultModalVisible] = useState(false);
-  const [gameResultMessage, setGameResultMessage] = useState("");
+  const [descriptionImages, setDescriptionImages] = useState(0);
+  const [isGameDescriptionModalVisible, setIsGameDescriptionModalVisible] = useState(true);
 
   const initialTime = 999;
   const { timeLeft, startTimer, stopTimer, resetTimer, setTimeLeft } = useTimer(initialTime);
@@ -41,7 +43,7 @@ export default function Stage0Screen() {
     const subscription = AppState.addEventListener("change", handleAppStateChange);
 
     if (timeLeft === 0) {
-      onGameOver("timeout");
+      onGameOver();
     }
 
     return () => {
@@ -106,10 +108,18 @@ export default function Stage0Screen() {
     stopTimer();
   }
 
+  function handelQuestionButtonTouch() {
+    setIsGameDescriptionModalVisible(true);
+    setIsPaused(true);
+    stopTimer();
+  }
+
   function handleRightButtonTouch() {
     setIsMainModalVisible(false);
-    setIsPaused(false);
-    startTimer();
+    if (isPauseButtonVisible) {
+      setIsPaused(false);
+      startTimer();
+    }
   }
 
   function handleLeftButtonTouch() {
@@ -135,11 +145,10 @@ export default function Stage0Screen() {
     setIsSensitiveButtonVisible(false);
   }
 
-  function onGameOver(message) {
+  function onGameOver() {
     setIsGameResultModalVisible(true);
     setIsPaused(true);
     stopTimer();
-    setGameResultMessage(message);
   }
 
   return (
@@ -162,15 +171,20 @@ export default function Stage0Screen() {
             <Text style={styles.stageText}>Tutorial</Text>
             <Text style={styles.timeText}>{timeLeft}</Text>
           </View>
-          {isPauseButtonVisible ? (
-            <TouchableOpacity onPress={handleGamePauseButtonTouch}>
-              <Image style={styles.Images} source={pauseButtonImage} />
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={{ marginRight: 10 }} onPress={handelQuestionButtonTouch}>
+              <Image style={styles.Images} source={questionImage} />
             </TouchableOpacity>
-          ) : (
-            <TouchableOpacity onPress={handleGameResumeButtonTouch}>
-              <Image style={styles.Images} source={playButtonImage} />
-            </TouchableOpacity>
-          )}
+            {isPauseButtonVisible ? (
+              <TouchableOpacity onPress={handleGamePauseButtonTouch}>
+                <Image style={styles.Images} source={pauseButtonImage} />
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity onPress={handleGameResumeButtonTouch}>
+                <Image style={styles.Images} source={playButtonImage} />
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
         {isSensitiveButtonVisible ? (
           <View style={styles.countContainer}>
@@ -184,13 +198,16 @@ export default function Stage0Screen() {
           </View>
         ) : null}
       </View>
-      <GameDescriptionModal setIsPaused={setIsPaused} onGameStart={onGameStart} />
-      <GameResultModal
-        visible={isGameResultModalVisible}
-        currentStage={currentStage}
-        gameResultMessage={gameResultMessage}
-        timeLeft={timeLeft}
+      <GameDescriptionModal
+        setIsPaused={setIsPaused}
+        onGameStart={onGameStart}
+        setIsGameDescriptionModalVisible={setIsGameDescriptionModalVisible}
+        isGameDescriptionModalVisible={isGameDescriptionModalVisible}
+        isPauseButtonVisible={isPauseButtonVisible}
+        descriptionImages={descriptionImages}
+        setDescriptionImages={setDescriptionImages}
       />
+      <TutorialResultModal visible={isGameResultModalVisible} currentStage={currentStage} />
       <ConfirmationModal
         visible={isMainModalVisible}
         onLeftButtonTouch={handleLeftButtonTouch}
@@ -214,6 +231,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     backgroundColor: "transparent",
   },
+  buttonContainer: {
+    flexDirection: "row",
+    marginLeft: 10,
+  },
   countContainer: {
     flexDirection: "row",
     position: "absolute",
@@ -230,6 +251,8 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(218, 247, 217, 0.4)",
   },
   textContainer: {
+    position: "absolute",
+    marginLeft: vw(33),
     paddingHorizontal: 20,
     borderWidth: 2,
     borderRadius: 8,
