@@ -21,7 +21,6 @@ const GAME_STATE_KEY = "gameState";
 
 export default function Stage0Screen() {
   const [sensitiveCount, setSensitiveCount] = useState(5);
-  const [isSensitiveButtonVisible, setIsSensitiveButtonVisible] = useState(true);
   const [isPauseButtonVisible, setIsPauseButtonVisible] = useState(true);
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -142,7 +141,6 @@ export default function Stage0Screen() {
   function onGameStart() {
     hasGameStarted.current = true;
     startTimer();
-    setIsSensitiveButtonVisible(false);
   }
 
   function onGameOver() {
@@ -186,17 +184,15 @@ export default function Stage0Screen() {
             )}
           </View>
         </View>
-        {isSensitiveButtonVisible ? (
-          <View style={styles.countContainer}>
-            <TouchableOpacity onPress={handleDecreaseCount}>
-              <Image style={styles.Images} source={decreaseImage} />
-            </TouchableOpacity>
-            <Text style={styles.countText}>{sensitiveCount}</Text>
-            <TouchableOpacity onPress={handleIncreaseCount}>
-              <Image style={styles.Images} source={increaseImage} />
-            </TouchableOpacity>
-          </View>
-        ) : null}
+        <View style={styles.countContainer}>
+          <TouchableOpacity onPress={handleDecreaseCount}>
+            <Image style={styles.Images} source={decreaseImage} />
+          </TouchableOpacity>
+          <Text style={styles.countText}>{sensitiveCount}</Text>
+          <TouchableOpacity onPress={handleIncreaseCount}>
+            <Image style={styles.Images} source={increaseImage} />
+          </TouchableOpacity>
+        </View>
       </View>
       <GameDescriptionModal
         setIsPaused={setIsPaused}
