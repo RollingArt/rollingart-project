@@ -1,0 +1,47 @@
+{
+  "cli": {
+    "version": ">= 0.38.0"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "API_URL": "https://dev.api.example.com",
+        "OTHER_ENV_VAR": "development_value"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "API_URL": "https://staging.api.example.com",
+        "OTHER_ENV_VAR": "staging_value"
+      }
+    },
+    "release": {
+      "releaseChannel": "production",
+      "env": {
+        "API_URL": "https://api.example.com",
+        "OTHER_ENV_VAR": "production_value"
+      },
+      "ios": {
+        "distribution": "store"
+      },
+      "android": {
+        "buildType": "app-bundle"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "ldg6282@icloud.com",
+        "ascAppId": "6505098989",
+        "appleTeamId": "9DN558B4BM"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./path/to/your-service-account.json"
+      }
+    }
+  }
+}
