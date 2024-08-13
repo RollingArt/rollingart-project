@@ -3,6 +3,7 @@ module.exports = {
     browser: true,
     node: true,
     es2021: true,
+    jest: true,
   },
   extends: [
     "airbnb",
@@ -49,6 +50,7 @@ module.exports = {
     "global-require": "off",
     "react-native/no-inline-styles": "off",
     "no-plusplus": "off",
+    "import/no-extraneous-dependencies": ["error", {"devDependencies": true}]
   },
   settings: {
     react: {
